@@ -48,15 +48,8 @@ mod tests {
         let input = ast::Payload::Chunk(hyper::Chunk::from("lol"));
         let expr = ast::Expr::Pure(String::from("f"));
         let r = eval(&invoker, input, &expr);
-        // HELP(arjun): We get a warning because the result of .map is unused.
-        // Also, if r.wait() produces an error, we don't fail as we should.
-        // However, the obvious approach, which is r.wait().map(|x| { ast::inspect(&x) })
-        // makes the borrow checker sad.
-        r.wait().map(|x| {
-            assert_eq!(ast::inspect(&x), "fromF");
-        });
-        
-        
-        
+        assert_eq!(
+            r.wait().as_ref().map(|x| { ast::inspect(x) }), 
+            Result::Ok("fromF"));
     }
 }
