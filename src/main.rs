@@ -6,7 +6,10 @@ use hyper::rt::{Future};
 
 type EvalResult<'a> = Box<Future<Item = ast::Payload, Error = ()> + 'a>;
 
-// An invoker invokes a 
+// An invoker invokes a serverless function with the provided name. We
+// will different invoker implementations for different platforms. Moreoever,
+// we can test the language by fudging an invoker that doesn't call any
+// external functions, e.g, the TestInvoker below.
 pub trait Invoker {
     fn invoke(&self, name: &str, input: &ast::Payload) -> EvalResult;
 }
