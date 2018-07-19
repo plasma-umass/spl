@@ -6,3 +6,4 @@ authors = ["Arjun Guha <arjun@cs.umass.edu>"]
 [dependencies]
 hyper = "0.12"
 futures = "0.1"
+hyper-tls = "0.3"
