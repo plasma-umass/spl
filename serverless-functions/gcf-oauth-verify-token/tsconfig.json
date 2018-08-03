@@ -1,0 +1,20 @@
+{
+  "include": [
+      "src"
+   ],
+  "exclude": [
+    "dist"
+  ],
+  "compilerOptions": {
+      "declaration": true,
+      "pretty": true,
+      "strict": true,
+      "noImplicitReturns": true,
+      "inlineSourceMap": true,
+      "noUnusedLocals": true,
+      "module": "commonjs",
+      "outDir": "./dist",
+      "lib": ["es2015"],
+      "target": "es5"
+  }
+}

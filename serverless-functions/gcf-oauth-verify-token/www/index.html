@@ -1,0 +1,30 @@
+<html>
+  <head>
+      <meta name="google-signin-client_id" content="692270598994-1dp1lfi6s0dqg7h18f0h1ibrne4gi1bu.apps.googleusercontent.com">
+  </head>
+
+  <body>
+  <script src="https://apis.google.com/js/platform.js" defer async></script>
+  <script>
+    const cfUrl = 'https://us-east1-arjunguha-research-group.cloudfunctions.net/oauth-verify-token/';
+    function onSignIn(googleUser) {
+      const token =  googleUser.getAuthResponse().id_token;
+      const req = new Request(cfUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      fetch(req).then(response => {
+        response.json().then(json => console.log(json));
+      })
+      .catch(reason => {
+        console.error(reason)
+      });
+    }  
+  </script>
+  <div class="g-signin2" data-onsuccess="onSignIn"></div>
+  <p>Open the console for output.</p>
+
+  </body>
+
+</html>
