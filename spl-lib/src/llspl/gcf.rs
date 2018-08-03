@@ -3,7 +3,7 @@ extern crate hyper_tls;
 extern crate futures;
 
 use std::sync::Arc;
-use ast::*;
+use llspl::syntax::*;
 use hyper::{Request,Body};
 use hyper::rt::{Future, Stream};
 
