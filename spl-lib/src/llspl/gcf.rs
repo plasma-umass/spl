@@ -9,6 +9,7 @@ use super::storage::Storage;
 use hyper::{Request,Body};
 use hyper::rt::{Future, Stream};
 use super::eval::{Eval, EvalResult};
+use super::error::Error;
 // No alias for this type? It seems quite fundamental.
 type HttpsClient = hyper::Client<hyper_tls::HttpsConnector<
     hyper::client::HttpConnector>>;
@@ -36,18 +37,21 @@ impl Eval for GoogleCloudFunctions {
         url.push_str(&self.uri_base);
         url.push_str(name);
         let client = self.client.clone();
-        let req = Request::builder()
+        let req = input.to_body()
+          .and_then(|chunk|
+            Request::builder()
             .method("POST")
             .uri(url)
-            .body(input.to_body());
-        Box::new(futures::done(req)
-            .map_err(|err| Error::Http(err))
+            .body(Body::from(chunk))
+            .map_err(|err| Error::Http(err)));
+        let resp = futures::future::result(req)
             .and_then(move |req| client.request(req).map_err(|err| Error::Hyper(err)))
             .and_then(|response| { 
-                let (headers, body) = response.into_parts();
+                let (_headers, body) = response.into_parts();
                 body.concat2().map_err(|err| Error::Hyper(err))
                     .map(|chunk| Payload::Chunk(chunk))
-            }))
+            });
+        Box::new(resp)
     }
 }
 

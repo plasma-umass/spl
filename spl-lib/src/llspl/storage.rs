@@ -3,7 +3,8 @@ extern crate s3;
 use s3::credentials::Credentials;
 use s3::region::Region;
 use s3::bucket::Bucket;
-use super::syntax::{Payload, Error};
+use super::syntax::Payload;
+use super::error::Error;
 
 pub struct Storage {
     bucket: Bucket
@@ -11,8 +12,8 @@ pub struct Storage {
 
 impl Storage {
 
-    pub fn new(access_key: String, 
-           auth_key: String, 
+    pub fn new(access_key: String,
+           auth_key: String,
            endpoint: String,
            bucket_name: &str) -> Storage {
         let cred = Credentials::new(Some(access_key), Some(auth_key), None,

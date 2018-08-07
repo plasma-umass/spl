@@ -1,52 +1,11 @@
 extern crate hyper;
 extern crate futures;
-extern crate http;
+extern crate serde_json;
 
 use std;
 use hyper::Body;
 use json_transformers;
-use s3::error::S3Error;
-
-#[derive(Debug)]
-pub enum Error {
-    Storage(S3Error),
-    Http(http::Error),
-    Hyper(hyper::Error)
-}
-
-impl std::fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            Error::Storage(e) => e.fmt(f),
-            Error::Http(e) => e.fmt(f),
-            Error::Hyper(e) => e.fmt(f)
-        }
-    }
-}
-
-impl std::error::Error for Error {
-    fn description(&self) -> &str {
-        match self {
-            Error::Storage(err) => err.description(),
-            Error::Http(err) => err.description(),
-            Error::Hyper(err) => err.description()
-        }
-    }
-
-    fn cause(&self) -> Option<&std::error::Error> {
-        match self {
-            Error::Storage(err) => Some(err),
-            Error::Http(err) => Some(err),
-            Error::Hyper(err) => Some(err)
-
-        }
-    }
-}
-impl From<S3Error> for Error {
-    fn from(err: S3Error) -> Error {
-        Error::Storage(err)
-    }
-}
+use super::error::Error;
 
 // An invoker invokes a serverless function with the provided name. We will
 // have different invoker implementations for different platforms. Moreover,
@@ -58,13 +17,26 @@ impl From<S3Error> for Error {
 
 // Inputs and outputs of SPL programs
 pub enum Payload {
-    Chunk(hyper::Chunk)
+    Chunk(hyper::Chunk),
+    Json(serde_json::Value)
 }
 
 impl Payload {
-    pub fn to_body(self) -> Body {
+    pub fn to_json(self) -> Result<serde_json::Value, Error> {
         match self {
-        Payload::Chunk(chunk) => Body::from(chunk),
+            Payload::Json(json) => Ok(json),
+            Payload::Chunk(chunk) =>
+                serde_json::from_slice(chunk.as_ref())
+                    .map_err(|e| Error::Json(e))
+        }
+    }
+    pub fn to_body(self) -> Result<Body, Error> {
+        match self {
+           Payload::Chunk(chunk) => Ok(Body::from(chunk)),
+           Payload::Json(json) =>
+            serde_json::to_vec(&json)
+                .map_err(|e| Error::Json(e))
+                .map(|vec| Body::from(vec))
         }
     }
 
@@ -83,13 +55,14 @@ pub enum Expr {
     Pure(String),
     Seq(Box<Expr>, Box<Expr>),
     Project(json_transformers::Expr),
-    Fetch(String)    
+    Fetch(String)
 }
 
 // Convenience function for testing
 pub fn inspect(payload: &Payload) -> &str {
     match payload {
         Payload::Chunk(chunk) => std::str::from_utf8(chunk.as_ref())
-          .expect("failed to parse chunk as UTF-8")
+          .expect("failed to parse chunk as UTF-8"),
+        Payload::Json(json) => json.as_str().expect("could not show JSON")
     }
 }

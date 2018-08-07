@@ -6,10 +6,6 @@ extern crate hyper_tls;
 extern crate futures;
 extern crate s3;
 extern crate chrono;
-use hyper::{Request,Body,Client};
-
-use std::default::Default;
-
 
 pub mod json_transformers;
 pub mod llspl;
