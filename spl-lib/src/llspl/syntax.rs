@@ -55,7 +55,9 @@ pub enum Expr {
     Pure(String),
     Seq(Box<Expr>, Box<Expr>),
     Project(json_transformers::Expr),
-    Fetch(String)
+    Fetch(String),
+    Split(Box<Expr>),
+    If(Box<Expr>, Box<Expr>, Box<Expr>)
 }
 
 // Convenience function for testing
