@@ -1,12 +1,10 @@
-FROM ubuntu:18.04
+FROM arjunguha/rust
 MAINTAINER Arjun Guha <arjun@cs.umass.edu>
-RUN apt-get update -y
-RUN apt-get install -y curl build-essential libssl-dev pkg-config zlib1g-dev
-RUN curl https://sh.rustup.rs > rustup.sh
-RUN chmod a+x /rustup.sh
-RUN /rustup.sh -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+COPY cloud-build-spl-cargo.tgz /root/cloud-build-spl-cargo.tgz
+WORKDIR /root
+RUN tar xzf cloud-build-spl-cargo.tgz
 COPY spl-lib /root/spl-lib
 WORKDIR /root/spl-lib
 RUN cargo build
 RUN cargo test
+RUN tar cz /root/.cargo > /root/cloud-build-spl-cargo.tgz

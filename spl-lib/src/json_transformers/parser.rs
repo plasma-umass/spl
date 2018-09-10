@@ -18,8 +18,12 @@ named!(id<CompleteStr,String>,
     })));
 
 /*
+
+  Original grammar:
   pat ::= $in       Empty
         | pat . x   Dot(pat, x)
+
+  Eliminating left-recursion:
 
   pat ::= $in dots(Empty)
 
@@ -118,8 +122,7 @@ mod tests {
   #[test]
   fn test_parse_num() {
     let e = parse_string("1234");
-    println!("e = {:?}", e);
-    // assert!(e == Expr::Number(serde_json::Number::from(1234)));
+    assert!(e == Expr::Number(serde_json::Number::from_f64(1234.0).unwrap()));
   }
 
   #[test]
