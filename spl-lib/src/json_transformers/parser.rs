@@ -28,7 +28,7 @@ named!(id<CompleteStr,String>,
 */
 named!(pat<CompleteStr,Pat>, do_parse!(
   init: preceded!(tag!("$in"), value!(Pat::Empty)) >>
-  res: fold_many0!(preceded!(tag!("."), id), init, 
+  res: fold_many0!(preceded!(tag!("."), id), init,
     |acc: Pat, next: String| Pat::Dot(next, Box::new(acc))) >>
   (res)));
 
@@ -132,7 +132,6 @@ mod tests {
   fn test_parse_object() {
     let s = parse_string("{ \"x\": \"HI\" }");
     println!("HIHI: {:?}", s);
-    assert!(false);
   }
 
   #[test]
