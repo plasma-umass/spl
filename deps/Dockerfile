@@ -8,7 +8,7 @@ RUN apt-get update -y
 RUN apt-get install -y curl build-essential libssl-dev pkg-config zlib1g-dev
 RUN curl https://sh.rustup.rs > /root/rustup.sh
 RUN chmod a+x /root/rustup.sh
-RUN /rroot/ustup.sh -y
+RUN /root/rustup.sh -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 WORKDIR /root
 RUN touch /root/spl-deps/src/lib.rs
