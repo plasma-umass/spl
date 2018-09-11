@@ -2,7 +2,6 @@
 cd /workspace/deps
 tar xzf cloud-build-spl-cargo.tgz
 rm cloud-build-spl-cargo.tgz
-mkdir spl-dep
-cp /workspace/spl-lib/Cargo.lock spl-dep/Cargo.lock
-cp /workspace/spl-lib/Cargo.toml spl-dep/Cargo.toml
+cp /workspace/spl-lib/Cargo.lock Cargo.lock
+cp /workspace/spl-lib/Cargo.toml Cargo.toml
 
