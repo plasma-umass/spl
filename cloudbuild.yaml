@@ -9,6 +9,8 @@ steps:
   args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl-deps:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl-deps:latest', 'deps']
   timeout: 600s
 - name: 'gcr.io/cloud-builders/docker'
+  args: ['push', 'gcr.io/arjunguha-research-group/spl-deps:latest']
+- name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl:latest', '.']
   timeout: 600s
 images: ['gcr.io/arjunguha-research-group/spl-deps:latest', 'gcr.io/arjunguha-research-group/spl:latest']
