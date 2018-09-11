@@ -1,0 +1,4 @@
+#!/bin/sh
+cd /workspace/deps
+tar xzf cloud-build-spl-cargo.tgz
+rm cloud-build-spl-cargo.tgz

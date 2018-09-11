@@ -5,6 +5,8 @@ steps:
   args: ['pull', 'gcr.io/arjunguha-research-group/spl-deps:latest']
 - name: gcr.io/cloud-builders/gsutil
   args: ['cp', 'gs://plasma-tmp/cloud-build-spl-cargo.tgz', '/workspace/deps/cloud-build-spl-cargo.tgz']
+- name: ubuntu
+  args: ['/workspace/deps/unpack']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl-deps:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl-deps:latest', 'deps']
   timeout: 600s

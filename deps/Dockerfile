@@ -8,7 +8,6 @@ RUN chmod a+x /rustup.sh
 RUN /rustup.sh -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 WORKDIR /root
-RUN tar xzf /workspace/deps/cloud-build-spl-cargo.tgz
 RUN mkdir -p /root/spl-deps/src
 RUN cp /workspace/spl-lib/Cargo.lock /root/spl-deps/Cargo.lock
 RUN cp /workspace/spl-lib/Cargo.toml /root/spl-deps/Cargo.toml
