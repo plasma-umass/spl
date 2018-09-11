@@ -1,5 +1,4 @@
 extern crate s3;
-
 use s3::credentials::Credentials;
 use s3::region::Region;
 use s3::bucket::Bucket;
