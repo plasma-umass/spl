@@ -9,13 +9,14 @@ RUN chmod a+x /root/rustup.sh
 RUN /root/rustup.sh -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-COPY spl-lib /root/spl-lib
 RUN mkdir -p /root/deps/src
 COPY spl-lib/Cargo.toml /root/deps/Cargo.toml
 COPY spl-lib/Cargo.lock /root/deps/Cargo.lock
 RUN touch /root/deps/src/lib.rs
 RUN cd deps && cargo build
+
+COPY spl-lib /root/spl-lib
 WORKDIR /root/spl-lib
+RUN mv /root/deps/target target
 RUN cargo build
 RUN cargo test
-RUN tar cz /root/.cargo > /workspace/cloud-build-spl-cargo.tgz
