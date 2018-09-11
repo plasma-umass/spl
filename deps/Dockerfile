@@ -9,8 +9,8 @@ RUN /rustup.sh -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 WORKDIR /root
 RUN mkdir -p /root/spl-deps/src
-RUN cp /workspace/spl-lib/Cargo.lock /root/spl-deps/Cargo.lock
-RUN cp /workspace/spl-lib/Cargo.toml /root/spl-deps/Cargo.toml
+COPY spl-lib/Cargo.lock /root/spl-deps/Cargo.lock
+COPY cpl-lib/Cargo.toml /root/spl-deps/Cargo.toml
 RUN touch /root/spl-deps/src/lib.rs
 WORKDIR /root/spl-deps
 RUN cargo build
