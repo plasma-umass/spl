@@ -7,7 +7,7 @@ RUN curl https://sh.rustup.rs > /rustup.sh
 RUN chmod a+x /rustup.sh
 RUN /rustup.sh -y
 ENV PATH="/root/.cargo/bin:${PATH}"
-WOKRDIR /root
+WORKDIR /root
 RUN tar xzf /workspace/deps/cloud-build-spl-cargo.tgz
 RUN mkdir -p /root/spl-deps/src
 RUN cp /workspace/spl-lib/Cargo.lock /root/spl-deps/Cargo.lock
