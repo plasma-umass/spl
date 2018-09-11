@@ -4,21 +4,15 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['pull', 'gcr.io/arjunguha-research-group/spl-deps:latest']
 - name: gcr.io/cloud-builders/gsutil
-  args: ['cp', 'gs://plasma-tmp/cloud-build-spl-cargo.tgz', '/workspace/cloud-build-spl-cargo.tgz']
+  args: ['cp', 'gs://plasma-tmp/cloud-build-spl-cargo.tgz', '/workspace/deps/cloud-build-spl-cargo.tgz']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl-deps:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl-deps:latest', '--file', 'deps.dockerfile', '.']
+  args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl-deps:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl-deps:latest', 'deps']
   timeout: 600s
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'spl', '--cache-from', 'gcr.io/arjunguha-research-group/spl:latest', '.']
+  args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl:latest', '.']
   timeout: 600s
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['run', '--name', 'spl', 'spl', '/bin/true']
-- name: 'gcr.io/cloud-builders/docker'
-  args: ['cp', 'spl:/root/cloud-build-spl-cargo.tgz', '/workspace/cloud-build-spl-cargo.tgz']
-- name: 'gcr.io/cloud-builders/docker'
-  args: [ 'tag', 'spl', 'gcr.io/arjunguha-research-group/spl' ]
 images: ['gcr.io/arjunguha-research-group/spl-deps:latest', 'gcr.io/arjunguha-research-group/spl:latest']
 artifacts:
   objects:
     location: 'gs://plasma-tmp/'
-    paths: ['/workspace/cloud-build-spl-cargo.tgz']
+    paths: ['/workspace/deps/cloud-build-spl-cargo.tgz']
