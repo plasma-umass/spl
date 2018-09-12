@@ -1,0 +1,12 @@
+{
+  "name": "plotjson",
+  "version": "0.0.1",
+  "private": true,
+  "author": "Donald Pinckney",
+  "engines": {
+    "node": ">=4.3.2"
+  },
+  "devDependencies": {
+    "express": "^4.16.3"
+  }
+}
