@@ -1,0 +1,7 @@
+{
+  "name": "XML-to-JSON",
+  "version": "0.0.1",
+  "dependencies": {
+    "xml2json-light": "1.0.6"
+  }
+}
