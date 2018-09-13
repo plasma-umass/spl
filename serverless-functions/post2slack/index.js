@@ -1,13 +1,19 @@
 'use strict';
 const https = require('https');
 
-/**
- * Take a JSON request and POST to Slack; respond with success/fail.
- *
- * @param {!express:Request} req HTTP request context.
- * @param {!express:Response} res HTTP response context.
- */
-exports.main = function(req, res) {
+function post2slack() {
+  //TODO
+}
+
+function main(params) {
+  //TODO
+}
+
+exports.mainAWS = function(event, context, callback) {
+  //TODO
+};
+
+exports.mainGCP = function(req, res) {
   const request = https.request({
     hostname: 'slack.com',
     path: '/api/chat.postMessage',
