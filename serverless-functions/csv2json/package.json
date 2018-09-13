@@ -1,2 +1,5 @@
 {
+  "dependencies": {
+    "csvjson": "5.1.0"
+  }
 }
