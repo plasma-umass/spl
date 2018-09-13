@@ -1,31 +1,26 @@
-'use strict';
+"use strict";
 
-const exec = require('child_process').exec;
-const vega = require('vega');
+const vega = require("vega");
 
-/**
- *
- * @param {Object} req A Javascript object of the JSON body, or null if there is no parsable JSON body
- * @param {Object} res A Javascript object of the GET query.
- */
+
 function plotjson(jsonBody, getQuery, callback) {
-  const xName = getQuery.xname;
-  const yName = getQuery.yname;
+  const xName = getQuery.xname,
+        yName = getQuery.yname;
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {
-    callback(null);
+    callback("JSON input is not an array", 400);
     return;
   }
 
   // Remap the JSON input by renaming xName => "x", yName => "y"
   var mapFailed = false;
-  const renamedData = jsonBody.map(pair => {
+  const renamedData = jsonBody.map(function(pair) {
     if((xName in pair) && (yName in pair)) {
-      const renamedPair = {"x" : pair[xName], "y" : pair[yName]};
+      const renamedPair = {x : pair[xName], y : pair[yName]};
       return renamedPair
     } else {
-      callback(null);
+      callback(`JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 400);
       mapFailed = true;
     }
   });
@@ -107,26 +102,29 @@ function plotjson(jsonBody, getQuery, callback) {
     ]
   };
 
-  const parsed = vega.parse(plot_spec);
-
-  var view = new vega.View(parsed)
+  const view = new vega.View(vega.parse(plot_spec))
     .logLevel(vega.Warn) // set view logging level
-    .renderer('svg') // set render type (defaults to 'canvas')
+    .renderer("svg") // set render type (defaults to "canvas")
     .run(); // update and render the view
 
-  view.toImageURL('png', 2).then(function(url) {
+  view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
     const base64res = url.replace("data:image/png;base64,", "");
-    const buf = Buffer.from(base64res, 'base64')
-    callback(buf);
-  }).catch(function(error) { /* error handling */ });
+    const buf = Buffer.from(base64res, "base64")
+    callback(buf, 200);
+  }).catch(function(error) { 
+    callback(null, 500); 
+  });
 }
 
-exports.plotjson_GCF = (req, res) => {
-  plotjson(req.body, req.query, output => {
-    res.status(200);
-    res.set('Content-Type', 'image/png');
-    res.send(output);
-    res.end();
+exports.plotjson_GCF = function(req, res) {
+  plotjson(req.body, req.query, function(output, statusCode) {
+    if(statusCode === 200) {
+      res.set("content-type", "image/png");
+      res.status(200).send(output);
+    } else {
+      res.set("content-type", "text/plain");
+      res.status(statusCode).send(output);
+    }
   });
 };
