@@ -51,6 +51,7 @@ impl Payload {
 }
 
 // SPL expressions
+#[derive(Debug, PartialEq)]
 pub enum Expr {
     Pure(String),
     Seq(Box<Expr>, Box<Expr>),
