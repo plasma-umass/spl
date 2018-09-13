@@ -1,11 +1,8 @@
-pub mod parser;
+//! A DSL to transform JSON values.
+mod parser;
 mod syntax;
 mod eval;
 
-use serde_json::Value;
-
-pub type Expr = syntax::Expr;
-
-pub fn eval(expr: &Expr, value: &Value) -> Option<Value> {
-  eval::eval(expr, value)
-}
+pub use self::syntax::{Expr, Pat};
+pub use self::eval::eval;
+pub use self::parser::parse;

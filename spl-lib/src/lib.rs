@@ -11,7 +11,7 @@ extern crate chrono;
 pub mod json_transformers;
 pub mod llspl;
 
-fn test_storage()  {
+fn _test_storage()  {
   use s3;
 
   let cred = s3::credentials::Credentials::new(
@@ -23,7 +23,7 @@ fn test_storage()  {
   
 
   let bucket = s3::bucket::Bucket::new(bucket_name, region, cred);
-  let (data, code) = bucket.get("calvin.png").unwrap();
+  let (data, _code) = bucket.get("calvin.png").unwrap();
   println!("Code: {}\n", data.len());
   assert!(false);
 }

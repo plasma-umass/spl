@@ -4,7 +4,6 @@ use nom::{recognize_float};
 use nom::alphanumeric0;
 use nom::alpha;
 use nom::types::CompleteStr;
-use std::str;
 use json_transformers::syntax::*;
 
 named!(id<CompleteStr,String>,
@@ -100,23 +99,15 @@ named!(
   key_val<CompleteStr,(String, Expr)>,
   ws!(separated_pair!(strings, tag!(":"), expr_e)));
 
-named!(
-  parse_expr<CompleteStr,Expr>,
+named!(pub parse<CompleteStr, Expr>,
   complete!(expr_e));
-
-pub fn parse(input: &str)  -> Result<Expr, nom::Err<CompleteStr>> {
-  parse_expr(CompleteStr(input))
-    .map(|tuple| tuple.1)
-}
 
 #[cfg(test)]
 mod tests {
-  use json_transformers::syntax::*;
-  use json_transformers::parser::*;
-  use std::str::FromStr;
+  use super::*;
 
   fn parse_string(input: &str) -> Expr {
-    return parse_expr(CompleteStr(input)).unwrap().1;
+    return parse(CompleteStr(input)).unwrap().1;
   }
 
   #[test]
