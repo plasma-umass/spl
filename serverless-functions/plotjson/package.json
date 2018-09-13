@@ -8,5 +8,8 @@
   },
   "devDependencies": {
     "express": "^4.16.3"
+  },
+  "dependencies": {
+    "vega": "^4.2.0"
   }
 }
