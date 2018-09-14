@@ -3,14 +3,13 @@
 const vega = require("vega");
 
 
-function plotjson(jsonBody, getQuery, callback) {
+function plotjson(jsonBody, getQuery) {
   const xName = getQuery.xname,
         yName = getQuery.yname;
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {
-    callback("JSON input is not an array", 400);
-    return;
+    return Promise.resolve({result: "JSON input is not an array", status: 400});
   }
 
   var renamedData = [];
@@ -19,8 +18,9 @@ function plotjson(jsonBody, getQuery, callback) {
       const renamedPair = {x : pair[xName], y : pair[yName]};
       renamedData.push(renamedPair);
     } else {
-      callback(`JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 400);
-      return;
+      return Promise.resolve({
+        result: `JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 
+        status: 400});
     }
   });
 
@@ -102,18 +102,21 @@ function plotjson(jsonBody, getQuery, callback) {
     .renderer("svg") // set render type (defaults to "canvas")
     .run(); // update and render the view
 
-  view.toImageURL("png", 2).then(function(url) {
+  return view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
     const base64res = url.replace("data:image/png;base64,", "");
     const buf = Buffer.from(base64res, "base64")
-    callback(buf, 200);
+    return {result: buf, status: 200};
   }).catch(function(error) { 
-    callback(null, 500); 
+    return {result: null, status: 500};
   });
 }
 
 exports.plotjson_GCF = function(req, res) {
-  plotjson(req.body, req.query, function(output, statusCode) {
+  plotjson(req.body, req.query).then(function (ret) {
+    const output = ret.result;
+    const statusCode = ret.status;
+
     if(statusCode === 200) {
       res.set("content-type", "image/png");
       res.status(200).send(output);
@@ -123,24 +126,3 @@ exports.plotjson_GCF = function(req, res) {
     }
   });
 };
-
-
-// Scratch test
-function plotjson_test() {
-  const test_data = [
-    {
-      "age": 0,
-      "height": 28
-    },
-    {
-      "age": 3,
-      "height": 49
-    }
-  ];
-
-  plotjson(test_data, {"xname" : "age", "yname" : "height"}, output => {
-    process.stdout.write(output);
-  });
-}
-
-plotjson_test();
