@@ -13,21 +13,16 @@ function plotjson(jsonBody, getQuery, callback) {
     return;
   }
 
-  // Remap the JSON input by renaming xName => "x", yName => "y"
-  var mapFailed = false;
-  const renamedData = jsonBody.map(function(pair) {
+  var renamedData = [];
+  jsonBody.forEach(function(pair) {
     if((xName in pair) && (yName in pair)) {
       const renamedPair = {x : pair[xName], y : pair[yName]};
-      return renamedPair
+      renamedData.push(renamedPair);
     } else {
       callback(`JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 400);
-      mapFailed = true;
+      return;
     }
   });
-
-  if(mapFailed) {
-    return;
-  }
 
   const plot_spec = {
     "$schema": "https://vega.github.io/schema/vega/v4.json",
@@ -128,3 +123,24 @@ exports.plotjson_GCF = function(req, res) {
     }
   });
 };
+
+
+// Scratch test
+function plotjson_test() {
+  const test_data = [
+    {
+      "age": 0,
+      "height": 28
+    },
+    {
+      "age": 3,
+      "height": 49
+    }
+  ];
+
+  plotjson(test_data, {"xname" : "age", "yname" : "height"}, output => {
+    process.stdout.write(output);
+  });
+}
+
+plotjson_test();
