@@ -9,20 +9,23 @@ function plotjson(jsonBody, getQuery) {
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {
-    return Promise.resolve({result: "JSON input is not an array", status: 400});
+    return Promise.reject({message: "JSON input is not an array", status: 400});
   }
 
+
   var renamedData = [];
-  jsonBody.forEach(function(pair) {
+  for(const i in jsonBody) {
+    const pair = jsonBody[i];
+
     if((xName in pair) && (yName in pair)) {
       const renamedPair = {x : pair[xName], y : pair[yName]};
       renamedData.push(renamedPair);
     } else {
-      return Promise.resolve({
-        result: `JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 
+      return Promise.reject({
+        message: `JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 
         status: 400});
     }
-  });
+  }
 
   const plot_spec = {
     "$schema": "https://vega.github.io/schema/vega/v4.json",
@@ -106,23 +109,19 @@ function plotjson(jsonBody, getQuery) {
     // Remove the first occurrence of the data type header thingy
     const base64res = url.replace("data:image/png;base64,", "");
     const buf = Buffer.from(base64res, "base64")
-    return {result: buf, status: 200};
+    return buf;
+    // return {result: buf, status: 200};
   }).catch(function(error) { 
-    return {result: null, status: 500};
+    return {message: error, status: 500};
   });
 }
 
 exports.plotjson_GCF = function(req, res) {
-  plotjson(req.body, req.query).then(function (ret) {
-    const output = ret.result;
-    const statusCode = ret.status;
-
-    if(statusCode === 200) {
-      res.set("content-type", "image/png");
-      res.status(200).send(output);
-    } else {
-      res.set("content-type", "text/plain");
-      res.status(statusCode).send(output);
-    }
+  plotjson(req.body, req.query).then(function (output) {
+    res.set("content-type", "image/png");
+    res.status(200).send(output);
+  }, function(ret) {
+    res.set("content-type", "text/plain");
+    res.status(ret.status).send(ret.message);
   });
 };
