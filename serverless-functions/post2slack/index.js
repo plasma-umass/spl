@@ -40,6 +40,6 @@ exports.mainGCP = function(req, res) {
     });
   });
 
-  request.write(req.body);
+  request.write(`${req.body}`);
   request.end();
 };
