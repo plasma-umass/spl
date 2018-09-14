@@ -19,7 +19,7 @@ exports.mainGCP = function(req, res) {
     path: '/api/chat.postMessage',
     method: 'POST',
     headers: {
-      'content-type': 'application/json',
+      'content-type': 'application/json;charset=utf-8',
       authorization: '<TOKEN HERE>'
     }
   }, function(response) {//One-time listener for the response event.
