@@ -11,7 +11,8 @@ pub enum Error {
     Http(http::Error),
     Hyper(hyper::Error),
     Json(serde_json::Error),
-    JsonEval
+    JsonEval,
+    InvokeError(&'static str)
 }
 
 impl std::fmt::Display for Error {
@@ -21,7 +22,9 @@ impl std::fmt::Display for Error {
             Error::Http(e) => e.fmt(f),
             Error::Hyper(e) => e.fmt(f),
             Error::Json(e) => e.fmt(f),
-            Error::JsonEval => f.write_str("JsonEval")
+            Error::JsonEval => f.write_str("JsonEval"),
+            Error::InvokeError(message) =>
+                f.write_str(message)
         }
     }
 }
@@ -33,7 +36,8 @@ impl std::error::Error for Error {
             Error::Http(err) => err.description(),
             Error::Hyper(err) => err.description(),
             Error::Json(e) => e.description(),
-            Error::JsonEval => "JsonEval"
+            Error::JsonEval => "JsonEval",
+            Error::InvokeError(message) => message
         }
     }
 

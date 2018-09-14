@@ -56,9 +56,9 @@ named!(atom_e<CompleteStr,Expr>,
         project_e |
         parens_e)));
 
-pub fn parse(input: CompleteStr)  ->
+pub fn parse(input: &str)  ->
     Result<(CompleteStr, Expr), nom::Err<CompleteStr>> {
-  seq_e(input)
+  seq_e(CompleteStr(input))
 }
 
 #[cfg(test)]
@@ -66,7 +66,7 @@ mod tests {
     use super::*;
 
     fn parse_string(input: &str) -> Expr {
-        let r = parse(CompleteStr(input));
+        let r = parse(input);
         println!("Result = {:?}", r);
         return r.unwrap().1;
     }
