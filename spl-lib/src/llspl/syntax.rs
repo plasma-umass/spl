@@ -16,12 +16,25 @@ use super::error::Error;
 // }
 
 // Inputs and outputs of SPL programs
+
+#[derive(Debug)]
 pub enum Payload {
     Chunk(hyper::Chunk),
     Json(serde_json::Value)
 }
 
+impl PartialEq for Payload {
+  fn eq(&self, other: &Payload) -> bool {
+      match (self, other) {
+          (Payload::Json(x), Payload::Json(y)) => x == y,
+          (Payload::Chunk(_x), Payload::Chunk(_y)) => false,
+          _ => false
+      }
+  }
+}
+
 impl Payload {
+
     pub fn to_json(self) -> Result<serde_json::Value, Error> {
         match self {
             Payload::Json(json) => Ok(json),

@@ -63,3 +63,56 @@ pub trait Eval : Sync {
   }
 
 }
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  struct MockEval { }
+
+  impl Eval for MockEval {
+
+    fn fetch<'a,'b>(&'b self, _path: &'b str) -> EvalResult<'a> {
+        Box::new(futures::future::result(Ok(Payload::Json(json!({})))))
+    }
+
+    fn invoke<'a,'b>(&'b self, name: &'b str, input: Payload) -> EvalResult<'a> {
+      let result = match name {
+        "f" => input.to_json().map(|json|
+          Payload::Json(json!({ "input": json, "receiver": "f" }))),
+        _ => Result::Err(Error::InvokeError("unknown function"))
+      };
+      Box::new(futures::future::result(result))
+    }
+  }
+
+  fn parse(code: &'static str) -> Expr {
+    super::super::parser::parse(code).unwrap().1
+  }
+
+  #[test]
+  fn test_seq() {
+    let exp = parse("pure f ; pure f");
+    let result = (MockEval{}).eval(Payload::Json(json!({ "x": 10 })), &exp);
+    assert!(result.wait().unwrap() ==
+      Payload::Json(json!({
+        "input": {
+          "input": { "x": 10 },
+          "receiver": "f"
+        },
+        "receiver": "f"
+    })));
+  }
+
+ #[test]
+  fn test_seq_proj() {
+    let exp = parse("pure f ; project $in.receiver ; pure f");
+    let result = (MockEval{}).eval(Payload::Json(json!({ "x": 10 })), &exp);
+    assert!(result.wait().unwrap() ==
+      Payload::Json(json!({
+        "input": "f",
+        "receiver": "f"
+    })));
+  }
+
+}
