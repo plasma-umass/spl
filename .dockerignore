@@ -1,1 +1,4 @@
 /spl-lib/target
+**/node_modules
+**/dist
+.git

@@ -1,4 +1,4 @@
-FROM gcr.io/arjunguha-research-group/spl-deps:latest
+FROM ubuntu:18.04
 MAINTAINER Arjun Guha <arjun@cs.umass.edu>
 WORKDIR /root
 
