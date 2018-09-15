@@ -1,0 +1,17 @@
+{
+    "include": [
+        "src"
+     ],
+    "exclude": [
+      "dist"
+    ],
+    "compilerOptions": {
+        "strict": true,
+        "inlineSourceMap": true,
+        "noUnusedLocals": true,
+        "module": "commonjs",
+        "outDir": "./dist",
+        "lib": ["es2016"],
+        "target": "es6"
+    }
+  }
