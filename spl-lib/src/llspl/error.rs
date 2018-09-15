@@ -12,7 +12,7 @@ pub enum Error {
     Hyper(hyper::Error),
     Json(serde_json::Error),
     JsonEval,
-    InvokeError(&'static str)
+    InvokeError(String)
 }
 
 impl std::fmt::Display for Error {
