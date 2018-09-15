@@ -1,7 +1,7 @@
 steps:
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['pull', 'gcr.io/arjunguha-research-group/spl:latest']
+  args: ['pull', 'gcr.io/umass-plasma/spl:latest']
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'gcr.io/arjunguha-research-group/spl:latest', '--cache-from', 'gcr.io/arjunguha-research-group/spl:latest', '.']
+  args: ['build', '-t', 'gcr.io/umass-plasma/spl:latest', '--cache-from', 'gcr.io/umass-plasma/spl:latest', '.']
   timeout: 600s
-images: ['gcr.io/arjunguha-research-group/spl:latest']
+images: ['gcr.io/umass-plasma/spl:latest']
