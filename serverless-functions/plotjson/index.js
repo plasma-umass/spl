@@ -1,0 +1,127 @@
+"use strict";
+
+const vega = require("vega");
+
+
+function plotjson(jsonBody, getQuery) {
+  const xName = getQuery.xname,
+        yName = getQuery.yname;
+
+  // Validate that JSON is an array
+  if(!Array.isArray(jsonBody)) {
+    return Promise.reject({message: "JSON input is not an array", status: 400});
+  }
+
+
+  var renamedData = [];
+  for(const i in jsonBody) {
+    const pair = jsonBody[i];
+
+    if((xName in pair) && (yName in pair)) {
+      const renamedPair = {x : pair[xName], y : pair[yName]};
+      renamedData.push(renamedPair);
+    } else {
+      return Promise.reject({
+        message: `JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 
+        status: 400});
+    }
+  }
+
+  const plot_spec = {
+    "$schema": "https://vega.github.io/schema/vega/v4.json",
+    "width": 400,
+    "height": 200,
+    "padding": 5,
+    "config": {
+      "background": "white"
+    },
+    "data": [
+      {
+        "name": "table",
+        "values": renamedData
+      }
+    ],
+    "scales": [
+      {
+        "name": "xscale",
+        "type": "point",
+        "range": "width",
+        "domain": {
+          "data": "table",
+          "field": "x"
+        }
+      },
+      {
+        "name": "yscale",
+        "type": "linear",
+        "range": "height",
+        "nice": true,
+        "zero": true,
+        "domain": {
+          "data": "table",
+          "field": "y"
+        }
+      }
+    ],
+    "axes": [
+      {
+        "orient": "bottom",
+        "scale": "xscale",
+        "title": xName
+      },
+      {
+        "orient": "left",
+        "scale": "yscale",
+        "title": yName
+      }
+    ],
+    "marks": [
+      {
+        "type": "line",
+        "from": {
+          "data": "table"
+        },
+        "encode": {
+          "enter": {
+            "x": {
+              "scale": "xscale",
+              "field": "x"
+            },
+            "y": {
+              "scale": "yscale",
+              "field": "y"
+            },
+            "strokeWidth": {
+              "value": 1
+            }
+          }
+        }
+      }
+    ]
+  };
+
+  const view = new vega.View(vega.parse(plot_spec))
+    .logLevel(vega.Warn) // set view logging level
+    .renderer("svg") // set render type (defaults to "canvas")
+    .run(); // update and render the view
+
+  return view.toImageURL("png", 2).then(function(url) {
+    // Remove the first occurrence of the data type header thingy
+    const base64res = url.replace("data:image/png;base64,", "");
+    const buf = Buffer.from(base64res, "base64")
+    return buf;
+    // return {result: buf, status: 200};
+  }).catch(function(error) { 
+    return {message: error, status: 500};
+  });
+}
+
+exports.plotjson_GCF = function(req, res) {
+  plotjson(req.body, req.query).then(function (output) {
+    res.set("content-type", "image/png");
+    res.status(200).send(output);
+  }, function(ret) {
+    res.set("content-type", "text/plain");
+    res.status(ret.status).send(ret.message);
+  });
+};
