@@ -397,6 +397,11 @@ version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "leak"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "libc"
 version = "0.2.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -631,6 +636,11 @@ dependencies = [
 ]
 
 [[package]]
+name = "rpds"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
 name = "rust-ini"
 version = "0.9.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -767,7 +777,9 @@ dependencies = [
  "http 0.1.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper 0.12.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "hyper-tls 0.3.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "leak 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "nom 4.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rpds 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rust-s3 0.10.0-beta.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde_json 1.0.24 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -1074,6 +1086,7 @@ dependencies = [
 "checksum kernel32-sys 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)" = "7507624b29483431c0ba2d82aece8ca6cdba9382bff4ddd0f7490560c056098d"
 "checksum lazy_static 1.0.2 (registry+https://github.com/rust-lang/crates.io-index)" = "fb497c35d362b6a331cfd94956a07fc2c78a4604cdbee844a81170386b996dd3"
 "checksum lazycell 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a6f08839bc70ef4a3fe1d566d5350f519c5912ea86be0df1740a7d247c7fc0ef"
+"checksum leak 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "bd100e01f1154f2908dfa7d02219aeab25d0b9c7fa955164192e3245255a0c73"
 "checksum libc 0.2.42 (registry+https://github.com/rust-lang/crates.io-index)" = "b685088df2b950fccadf07a7187c8ef846a959c142338a48f9dc0b94517eb5f1"
 "checksum libz-sys 1.0.18 (registry+https://github.com/rust-lang/crates.io-index)" = "87f737ad6cc6fd6eefe3d9dc5412f1573865bded441300904d2f42269e140f16"
 "checksum log 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)" = "e19e8d5c34a3e0e2223db8e060f9e8264aeeb5c5fc64a4ee9965c062211c024b"
@@ -1102,6 +1115,7 @@ dependencies = [
 "checksum rand_core 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)" = "edecf0f94da5551fc9b492093e30b041a891657db7940ee221f9d2f66e82eef2"
 "checksum redox_syscall 0.1.40 (registry+https://github.com/rust-lang/crates.io-index)" = "c214e91d3ecf43e9a4e41e578973adeb14b474f2bee858742d127af75a0112b1"
 "checksum remove_dir_all 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "3488ba1b9a2084d38645c4c08276a1752dcbf2c7130d74f1569681ad5d2799c5"
+"checksum rpds 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d41235ae795ad106da2c4f3dbdd09537062b14a15ee4754d4c9f4eeb69b4ad8b"
 "checksum rust-ini 0.9.12 (registry+https://github.com/rust-lang/crates.io-index)" = "7c6975d9bfcab77cffaf22c9f7fe08baa55a075e4ec1f8197d1f4be93c4a8658"
 "checksum rust-s3 0.10.0-beta.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b1996dc2c2b1fc68726f371328552c38c5e82d0a926f6eb37610ca82d8c777a9"
 "checksum rustc-demangle 0.1.9 (registry+https://github.com/rust-lang/crates.io-index)" = "bcfe5b13211b4d78e5c2cadfebd7769197d95c639c35a50057eb4c05de811395"
