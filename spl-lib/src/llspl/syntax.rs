@@ -3,7 +3,7 @@ extern crate futures;
 extern crate serde_json;
 
 use std;
-use hyper::Body;
+use hyper::{Body, Response};
 use json_transformers;
 use super::error::Error;
 
@@ -51,6 +51,13 @@ impl Payload {
                 .map_err(|e| Error::Json(e))
                 .map(|vec| Body::from(vec))
         }
+    }
+
+    pub fn to_response(self) -> Result<Response<Body>, Error> {
+        self.to_body().and_then(|body|
+          Response::builder()
+          .body(body)
+          .map_err(|err| Error::Http(err)))
     }
 
     pub fn from(a_str: &'static str) -> Payload {
