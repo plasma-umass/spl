@@ -80,7 +80,7 @@ mod tests {
       let result = match name {
         "f" => input.to_json().map(|json|
           Payload::Json(json!({ "input": json, "receiver": "f" }))),
-        _ => Result::Err(Error::InvokeError("unknown function"))
+        _ => Result::Err(Error::InvokeError("unknown function".to_string()))
       };
       Box::new(futures::future::result(result))
     }
