@@ -4,8 +4,11 @@ const vega = require("vega");
 
 
 function plotjson(jsonBody, getQuery) {
-  const xName = getQuery.xname,
-        yName = getQuery.yname;
+  // NOTE(arjun): Supporting query parameters and the body will require a bunch
+  // of needless engineering. I suggest we either include the names as part
+  // of the body, or assume that they are named "x" and "y"
+  const xName = getQuery.xname || "x",
+        yName = getQuery.yname || "y";
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {

@@ -1,4 +1,7 @@
 {
+  "scripts":{
+    "deploy": "gcloud functions deploy --trigger-http --region us-east1 --entry-point csv2json_GCF csv2json"
+  },
   "dependencies": {
     "csvjson": "^5.1.0"
   }
