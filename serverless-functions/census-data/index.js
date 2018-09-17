@@ -7,32 +7,26 @@ const url = "https://api.census.gov/data/timeseries/asm/industry?get=NAICS_TTL,E
 function censusdata(callback) {
   request({
     url: url,
-    json: true,
+    json: true
   }, function (error, response, body) {
-    if (!error && response.statusCode == 200) {
-      const data = body.slice(1);
-      const tupleData = data.map(function(row) {
+    if (!error && response.statusCode === 200) {
+      const tupleData = body.slice(1).map(function(row) {
         return {
           "Jobs": row[1],
           "Year": row[3]
-        }
+        };
       });
 
-      return callback(JSON.stringify(tupleData), response.statusCode)
+      return callback(JSON.stringify(tupleData), response.statusCode);
     } else {
-      return callback(error, response.statusCode)
+      return callback(error, response.statusCode);
     }
   })
 }
 
 exports.main = function(req, res) {
   censusdata(function(output, status) {
-    if(status == 200) {
-      res.set("content-type", "application/json");
-      res.status(200).send(output);
-    } else {
-      res.set("content-type", "text/plain");
-      res.status(status).send(output);
-    }
+    res.set("content-type", status === 200 ? "application/json" : "text/plain");
+    res.status(status).send(output);
   });
 };
