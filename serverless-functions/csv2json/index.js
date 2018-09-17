@@ -1,5 +1,5 @@
 'use strict';
-const csv = require('csvjson')
+const csv = require('csvjson');
 
 exports.mainAWS = function(event, context, callback) {
 	//TODO
@@ -7,7 +7,7 @@ exports.mainAWS = function(event, context, callback) {
 
 function csv2json(data) {
 	return csv.toObject(data.toString());
-}
+};
 
 exports.csv2json_GCF = function(req, res) {
 	try {
