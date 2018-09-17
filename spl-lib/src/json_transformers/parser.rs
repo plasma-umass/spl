@@ -16,6 +16,12 @@ named!(id<CompleteStr,String>,
       s
     })));
 
+named!(string<CompleteStr,String>, do_parse!(
+    _lquote : tag!("\"") >>
+    s : alphanumeric0 >>
+    _rquote : tag!("\"") >>
+    (String::from(s.0))));
+
 /*
 
   Original grammar:
@@ -36,7 +42,7 @@ named!(pat<CompleteStr,Pat>, do_parse!(
   (res)));
 
 named!(pat_atom<CompleteStr, PatAtom>, alt!(
-  map_p | select_p));
+  map_p | bracketed_select_p | select_p));
 
 named!(map_p<CompleteStr, PatAtom>, do_parse!(
   _map : tag!("map") >>
@@ -44,6 +50,14 @@ named!(map_p<CompleteStr, PatAtom>, do_parse!(
   e : expr_e >>
   _rparen : tag!(")") >>
   (PatAtom::Map(Box::new(e)))));
+
+// TODO(arjun): We need to write $in.["x"], which is silly. We should
+// refactor the grammar to support $in["x"]
+named!(bracketed_select_p<CompleteStr, PatAtom>, do_parse!(
+  _lbrack : tag!("[") >>
+  x : string >>
+  _rbrack : tag!("]") >>
+  (PatAtom::Select(x))));
 
 named!(select_p<CompleteStr, PatAtom>, do_parse!(
   x : id >>
