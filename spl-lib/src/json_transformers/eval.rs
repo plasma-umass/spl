@@ -5,9 +5,17 @@ use super::syntax::*;
 fn eval_pat(pat: &Pat, value: &Value) -> Option<Value> {
     match pat {
         Pat::Empty => Option::Some(value.clone()),
-        Pat::Dot(key, p) => value.as_object()
+        Pat::Pat(PatAtom::Select(key), p) => value.as_object()
             .and_then(|map| map.get(key))
-            .and_then(|v| eval_pat(p, v))
+            .and_then(|v| eval_pat(p, v)),
+        Pat::Pat(PatAtom::Map(f), p) => match value {
+            Value::Array(vec) => vec.iter()
+                .map(|e| eval(f, e))
+                .collect::<Option<Vec<Value>>>()
+                .map(|v| Value::Array(v))
+                .and_then(|v| eval_pat(p, &v)),
+            _ => None
+        }
     }
 }
 

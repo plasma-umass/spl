@@ -2,9 +2,15 @@ use serde_json::Number;
 extern crate serde_json;
 
 #[derive(Debug, PartialEq)]
+pub enum PatAtom {
+  Select(String),
+  Map(Box<Expr>)
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Pat {
   Empty,
-  Dot(String, Box<Pat>)
+  Pat(PatAtom, Box<Pat>),
 }
 
 #[derive(Debug, PartialEq)]

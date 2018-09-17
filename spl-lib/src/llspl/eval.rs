@@ -115,4 +115,13 @@ mod tests {
     })));
   }
 
+ #[test]
+  fn test_map_proj() {
+    let exp = parse("project $in.map({ \"y\": $in.x })");
+    let input = json!([ { "x": 10 }, { "x": 20 }]);
+    let output = json!([ { "y": 10 }, { "y": 20 }]);
+    let result = (MockEval{}).eval(Payload::Json(input), &exp);
+    assert!(result.wait().unwrap() == Payload::Json(output));
+  }
+
 }
