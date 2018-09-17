@@ -33,8 +33,7 @@ pub trait Eval : Sync {
 
   fn fetch<'a,'b>(&'b self, path: &'b str) -> EvalResult<'a>;
 
-  fn eval<'a,'b>(&'b self, input: Payload, expr: &'a Expr) -> EvalResult<'b>
-  where 'a : 'b {
+  fn eval<'a>(&'a self, input: Payload, expr: &'a Expr) -> EvalResult<'a> {
     match expr {
       Expr::Pure(n) => self.invoke(n, input),
       Expr::Seq(e1, e2) => Box::new(self.eval(input, e1)
@@ -58,7 +57,7 @@ pub trait Eval : Sync {
                    json::Value::Bool(true) => self.eval(Payload::Json(y), e2),
                    json::Value::Bool(false) => self.eval(Payload::Json(y), e3),
                    _ => Box::new(futures::failed(Error::JsonEval))
-                 })))
+                 }))),
     }
   }
 
@@ -113,6 +112,15 @@ mod tests {
         "input": "f",
         "receiver": "f"
     })));
+  }
+
+ #[test]
+  fn test_map_proj() {
+    let exp = parse("project $in.map({ \"y\": $in.x })");
+    let input = json!([ { "x": 10 }, { "x": 20 }]);
+    let output = json!([ { "y": 10 }, { "y": 20 }]);
+    let result = (MockEval{}).eval(Payload::Json(input), &exp);
+    assert!(result.wait().unwrap() == Payload::Json(output));
   }
 
 }

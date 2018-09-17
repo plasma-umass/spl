@@ -16,6 +16,12 @@ named!(id<CompleteStr,String>,
       s
     })));
 
+named!(string<CompleteStr,String>, do_parse!(
+    _lquote : tag!("\"") >>
+    s : alphanumeric0 >>
+    _rquote : tag!("\"") >>
+    (String::from(s.0))));
+
 /*
 
   Original grammar:
@@ -31,10 +37,31 @@ named!(id<CompleteStr,String>,
 */
 named!(pat<CompleteStr,Pat>, do_parse!(
   init: preceded!(tag!("$in"), value!(Pat::Empty)) >>
-  res: fold_many0!(preceded!(tag!("."), id), init,
-    |acc: Pat, next: String| Pat::Dot(next, Box::new(acc))) >>
+  res: fold_many0!(preceded!(tag!("."), pat_atom), init,
+    |acc: Pat, next: PatAtom| Pat::Pat(next, Box::new(acc))) >>
   (res)));
 
+named!(pat_atom<CompleteStr, PatAtom>, alt!(
+  map_p | bracketed_select_p | select_p));
+
+named!(map_p<CompleteStr, PatAtom>, do_parse!(
+  _map : tag!("map") >>
+  _lparen : tag!("(") >>
+  e : expr_e >>
+  _rparen : tag!(")") >>
+  (PatAtom::Map(Box::new(e)))));
+
+// TODO(arjun): We need to write $in.["x"], which is silly. We should
+// refactor the grammar to support $in["x"]
+named!(bracketed_select_p<CompleteStr, PatAtom>, do_parse!(
+  _lbrack : tag!("[") >>
+  x : string >>
+  _rbrack : tag!("]") >>
+  (PatAtom::Select(x))));
+
+named!(select_p<CompleteStr, PatAtom>, do_parse!(
+  x : id >>
+  (PatAtom::Select(x))));
 
 named!(
   strings<CompleteStr,String>,
@@ -132,7 +159,9 @@ mod tests {
   fn test_parse_pattern1() {
     let e = parse_string("$in.x");
     println!("e = {:?}", e);
-    assert!(e == Expr::Pat(Pat::Dot(String::from("x"), Box::new(Pat::Empty))));
+    assert!(e == Expr::Pat(
+      Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty))));
   }
 
   #[test]
@@ -140,8 +169,23 @@ mod tests {
     let e = parse_string("$in.x.y");
     println!("e = {:?}", e);
     assert!(e == Expr::Pat(
-      Pat::Dot(String::from("y"), 
-        Box::new(Pat::Dot(String::from("x"), Box::new(Pat::Empty))))));
+      Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(
+          Pat::Pat(PatAtom::Select(String::from("x")),
+            Box::new(Pat::Empty))))));
+  }
+
+  #[test]
+  fn test_parse_map() {
+    let e = parse_string("$in.map($in.x)");
+    assert!(e == Expr::Pat(
+      Pat::Pat(
+        PatAtom::Map(
+          Box::new(
+            Expr::Pat(
+              Pat::Pat(PatAtom::Select(String::from("x")),
+                Box::new(Pat::Empty))))),
+        Box::new(Pat::Empty))))
   }
 
 }
