@@ -1,5 +1,5 @@
 {
   "dependencies": {
-    "csvjson": "5.1.0"
+    "csvjson": "^5.1.0"
   }
 }
