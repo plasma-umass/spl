@@ -85,6 +85,10 @@ impl Eval for GoogleCloudFunctions {
             });
         Box::new(resp)
     }
+
+    fn download(&self, url: &str) -> EvalResult {
+        panic!("Not implemented")
+    }
 }
 
 impl GoogleCloudFunctions {

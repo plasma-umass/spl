@@ -33,9 +33,12 @@ pub trait Eval : Sync {
 
   fn fetch<'a,'b>(&'b self, path: &'b str) -> EvalResult<'a>;
 
+  fn download(&self, url: &str) -> EvalResult;
+
   fn eval<'a>(&'a self, input: Payload, expr: &'a Expr) -> EvalResult<'a> {
     match expr {
       Expr::Pure(n) => self.invoke(n, input),
+      Expr::Download(url) => self.download(url),
       Expr::Seq(e1, e2) => Box::new(self.eval(input, e1)
           .and_then(move |result| self.eval(result, e2))),
       Expr::Fetch(path) => self.fetch(path),
