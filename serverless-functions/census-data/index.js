@@ -1,6 +1,7 @@
 "use strict";
 
 const request = require('request');
+
 const url = "https://api.census.gov/data/timeseries/asm/industry?get=NAICS_TTL,EMP,GEO_TTL&for=us:*&YEAR=2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016&NAICS=31-33"
 
 function censusdata(callback) {
@@ -35,7 +36,3 @@ exports.main = function(req, res) {
     }
   });
 };
-
-// censusdata(function(output, status) {
-//   console.log(output)
-// });
