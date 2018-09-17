@@ -56,9 +56,14 @@ named!(atom_e<CompleteStr,Expr>,
         project_e |
         parens_e)));
 
+named!(parse_e<CompleteStr,Expr>, do_parse!(
+    e : seq_e >>
+    _eof : eof!() >>
+    (e)));
+
 pub fn parse(input: &str)  ->
     Result<(CompleteStr, Expr), nom::Err<CompleteStr>> {
-  seq_e(CompleteStr(input))
+  parse_e(CompleteStr(input))
 }
 
 #[cfg(test)]
