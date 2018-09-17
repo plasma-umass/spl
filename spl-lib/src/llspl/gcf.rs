@@ -39,6 +39,13 @@ fn set_content_length<'a, 'b>(
     }
 }
 
+fn get_content_type<'a, 'b>(payload : &'a Payload) -> &'b str {
+    match payload {
+        Payload::Chunk(_) => "text/plain",
+        Payload::Json(_) => "application/json"
+    }
+}
+
 impl Eval for GoogleCloudFunctions {
 
     fn fetch<'a,'b>(&'b self, path: &'b str) -> EvalResult<'a> {
@@ -48,16 +55,19 @@ impl Eval for GoogleCloudFunctions {
     fn invoke<'a,'b>(&'b self, name: &'b str, input: Payload) -> EvalResult<'a> {
         let url = format!("{}{}/", &self.uri_base, name);
         let client = self.client.clone();
+        let content_type = get_content_type(&input);
         let req = input.to_body()
-          .and_then(|chunk| {
-            set_content_length(&chunk,
-              Request::builder()
-              .method("POST")
-              .uri(&url)
-              .header("Content-Type", "application/json"))
-            .body(Body::from(chunk))
-            .map_err(|err| Error::Http(err))
-          });
+            .and_then(|chunk| {
+                let mut builder = Request::builder();
+                let builder = builder
+                    .method("POST")
+                    .uri(&url);
+                let builder = set_content_length(&chunk, builder);
+                builder
+                .header("Content-Type", content_type)
+                .body(Body::from(chunk))
+                .map_err(|err| Error::Http(err))
+            });
         let resp = futures::future::result(req)
             .and_then(move |req| client.request(req).map_err(|err| Error::Hyper(err)))
             .map(move |response| {
