@@ -40,7 +40,7 @@ named!(pure_e<CompleteStr,Expr>,
 named!(download_e<CompleteStr, Expr>,
     do_parse!(
         _reserved : tag!("download") >>
-        url : take_until!(";") >>
+        url : ws!(take_until!(";")) >>
         (Expr::Download(url.to_string()))));
 
 named!(project_e<CompleteStr,Expr>,

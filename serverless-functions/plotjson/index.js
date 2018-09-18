@@ -12,7 +12,7 @@ function plotjson(jsonBody, getQuery) {
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {
-    return Promise.reject({message: "JSON input is not an array", status: 400});
+    return Promise.reject({message: "JSON input is not an array, instead we received: " + JSON.stringify(jsonBody), status: 400});
   }
 
 
