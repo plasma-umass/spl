@@ -15,7 +15,7 @@ exports.mainAWS = function(event, context, callback) {
 
 exports.mainGCP = function(req, res) {
   try {
-    res.status(200).json(xml2json(req.body));
+    res.status(200).json(xml2json(req.body.xml));
   } catch(e) {
     res.status(400).json({
       error: `Please be sure to include valid XML in the request payload; ${e}.`
