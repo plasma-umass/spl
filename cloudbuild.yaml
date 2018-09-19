@@ -4,4 +4,9 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: ['build', '-t', 'gcr.io/umass-plasma/spl:latest', '--cache-from', 'gcr.io/umass-plasma/spl:latest', '.']
   timeout: 600s
+- name: 'gcr.io/cloud-builders/npm'
+  args: ['i']
+  dir: 'serverless-functions'
+- name: 'gcr.io/cloud-builders/npm'
+  args: ['t']
 images: ['gcr.io/umass-plasma/spl:latest']
