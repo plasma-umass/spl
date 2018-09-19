@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "jshint": "2.9.6"
+  },
+  "scripts": {
+    "test": "jshint --exclude-path ../.gitignore ."
+  }
+}
