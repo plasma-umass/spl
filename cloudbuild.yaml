@@ -9,4 +9,5 @@ steps:
   dir: 'serverless-functions'
 - name: 'gcr.io/cloud-builders/npm'
   args: ['t']
+  dir: 'serverless-functions'
 images: ['gcr.io/umass-plasma/spl:latest']
