@@ -1,17 +1,20 @@
 'use strict';
 const https = require('https');
 
+/* TODO
 function post2slack() {
-  //TODO
 }
+*/
 
+/* TODO (OW)
 function main(params) {
-  //TODO
 }
+*/
 
+/* TODO
 exports.mainAWS = function(event, context, callback) {
-  //TODO
 };
+*/
 
 exports.mainGCP = function(req, res) {
   const request = https.request({
