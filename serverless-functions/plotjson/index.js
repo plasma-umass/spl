@@ -17,8 +17,7 @@ function plotjson(jsonBody, getQuery) {
 
 
   var renamedData = [];
-  for(const i of jsonBody) {
-    const pair = jsonBody[i];
+  for(const pair of jsonBody) {
 
     if((xName in pair) && (yName in pair)) {
       const renamedPair = {x : pair[xName], y : pair[yName]};
