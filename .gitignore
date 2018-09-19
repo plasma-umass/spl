@@ -1,5 +1,4 @@
 target
 .vscode
 **/*.rs.bk
-/serverless-functions/node_modules
-/serverless-functions/*/node_modules
+**/node_modules
