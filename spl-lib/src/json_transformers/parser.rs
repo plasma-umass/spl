@@ -42,8 +42,8 @@ named!(string<CompleteStr,String>, delimited!(
   Original grammar:
 
     pat ::= $in            Pat::Empty
-          | pat.x          Pat::Pat(Dot(x), pat)
-          | pat[str]       Pat::Pat(Dot(str), pat)
+          | pat.x          Pat::Pat(Select(x), pat)
+          | pat[str]       Pat::Pat(Select(str), pat)
           | pat[num]       Pat::Pat(Index(n), pat)
           | pat1.map(pat2) Pat::Pat(Map(pat2), pat1)
 
