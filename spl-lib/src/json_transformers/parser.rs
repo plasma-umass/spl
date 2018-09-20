@@ -5,6 +5,7 @@ use nom::alphanumeric0;
 use nom::alpha;
 use nom::types::CompleteStr;
 use json_transformers::syntax::*;
+use nom::Needed; // https://github.com/Geal/nom/issues/780
 
 named!(id<CompleteStr,String>,
   do_parse!(
@@ -16,33 +17,51 @@ named!(id<CompleteStr,String>,
       s
     })));
 
-named!(string<CompleteStr,String>, do_parse!(
-    _lquote : tag!("\"") >>
-    s : alphanumeric0 >>
-    _rquote : tag!("\"") >>
-    (String::from(s.0))));
+named!(string<CompleteStr,String>, delimited!(
+  char!('\"'),
+  escaped_transform!(
+    none_of!("\\\"\n"),
+    '\\',
+    alt!(
+      // TODO(arjun): Fill in other escape characters
+      char!('n') => { |_| &"\n"[..] } |
+      char!('\\') => { |_| &"\\"[..] })),
+  char!('\"')));
 
 /*
 
   Original grammar:
-  pat ::= $in       Empty
-        | pat . x   Dot(pat, x)
+
+    pat ::= $in            Pat::Empty
+          | pat.x          Pat::Pat(Dot(x), pat)
+          | pat[str]       Pat::Pat(Dot(str), pat)
+          | pat[num]       Pat::Pat(Index(n), pat)
+          | pat1.map(pat2) Pat::Pat(Map(pat2), pat1)
 
   Eliminating left-recursion:
 
-  pat ::= $in dots(Empty)
+    pat      ::= $in pat_rest
 
-  dots(inner) ::= epsilon   inner
-                | .x dots   dots(inner.x)
+    pat_rest ::= ε
+               | .map (pat) pat_rest
+               | .x pat_rest
+               | [str] pat_rest
+               | [num] pat_rest
+
 */
 named!(pat<CompleteStr,Pat>, do_parse!(
   init: preceded!(tag!("$in"), value!(Pat::Empty)) >>
-  res: fold_many0!(preceded!(tag!("."), pat_atom), init,
+  res: fold_many0!(pat_rest, init,
     |acc: Pat, next: PatAtom| Pat::Pat(next, Box::new(acc))) >>
   (res)));
 
-named!(pat_atom<CompleteStr, PatAtom>, alt!(
-  map_p | bracketed_select_p | select_p));
+named!(pat_rest<CompleteStr, PatAtom>, alt!(
+  delimited!(tag!("["), bracketed_rest, tag!("]")) |
+    preceded!(tag!("."), dot_rest) ));
+
+named!(dot_rest<CompleteStr, PatAtom>, alt!(
+  map_p |
+  select_p));
 
 named!(map_p<CompleteStr, PatAtom>, do_parse!(
   _map : tag!("map") >>
@@ -51,28 +70,16 @@ named!(map_p<CompleteStr, PatAtom>, do_parse!(
   _rparen : tag!(")") >>
   (PatAtom::Map(Box::new(e)))));
 
-// TODO(arjun): We need to write $in.["x"], which is silly. We should
-// refactor the grammar to support $in["x"]
+named!(bracketed_rest<CompleteStr, PatAtom>, alt!(
+  bracketed_select_p));
+
 named!(bracketed_select_p<CompleteStr, PatAtom>, do_parse!(
-  _lbrack : tag!("[") >>
   x : string >>
-  _rbrack : tag!("]") >>
   (PatAtom::Select(x))));
 
 named!(select_p<CompleteStr, PatAtom>, do_parse!(
   x : id >>
   (PatAtom::Select(x))));
-
-named!(
-  strings<CompleteStr,String>,
-  delimited!(
-    tag!("\""),
-    map!(
-      escaped!(take_while1!(|x: char| x.is_alphabetic()), '\\', one_of!("\"n\\")),
-      |x: CompleteStr| String::from(x.0)),
-    tag!("\"")
-  )
-);
 
 named!(number_e<CompleteStr,Expr>,
   flat_map!(recognize_float,
@@ -91,7 +98,7 @@ named!(bool_e<CompleteStr,Expr>,
 
 named!(
   string_e<CompleteStr,Expr>,
-  map!(strings,
+  map!(string,
     |x| Expr::String(x.to_string())));
 
 named!(
@@ -124,7 +131,7 @@ named!(
 
 named!(
   key_val<CompleteStr,(String, Expr)>,
-  ws!(separated_pair!(strings, tag!(":"), expr_e)));
+  ws!(separated_pair!(string, tag!(":"), expr_e)));
 
 named!(pub parse<CompleteStr, Expr>,
   complete!(expr_e));
@@ -186,6 +193,24 @@ mod tests {
               Pat::Pat(PatAtom::Select(String::from("x")),
                 Box::new(Pat::Empty))))),
         Box::new(Pat::Empty))))
+  }
+
+  #[test]
+  fn test_parse_bracket() {
+    let e = parse_string("$in[\"x y\"]");
+    println!("e = {:?}", e);
+    assert!(e == Expr::Pat(
+      Pat::Pat(PatAtom::Select(String::from("x y")),
+        Box::new(Pat::Empty))));
+  }
+
+  #[test]
+  fn test_parse_bracket_escaped() {
+    let e = parse_string("$in[\"x \\ny\"]");
+    println!("e = {:?}", e);
+    assert!(e == Expr::Pat(
+      Pat::Pat(PatAtom::Select(String::from("x \ny")),
+        Box::new(Pat::Empty))));
   }
 
 }
