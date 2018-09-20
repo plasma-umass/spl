@@ -108,7 +108,7 @@ function plotjson(jsonBody, getQuery) {
   var view = new vega.View(vega.parse(plot_spec))
       .logLevel(vega.Warn) // set view logging level
       .renderer("svg") // set render type (defaults to "canvas")
-      .view.run(); // update and render the view
+      .run(); // update and render the view
 
   return view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
