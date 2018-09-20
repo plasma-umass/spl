@@ -71,10 +71,10 @@ impl Eval for GoogleCloudFunctions {
         let resp = futures::future::result(req)
             .and_then(move |req| client.request(req).map_err(|err| Error::Hyper(err)))
             .map(move |response| {
-//                  if !response.status().is_success() {
-//                    let msg = format!("{} from  {}", response.status(), url);
-//                    return Result::Err(Error::InvokeError(msg));
-//                  }
+                  if !response.status().is_success() {
+                    let msg = format!("{} from  {}, with body {:?}", response.status(), url, response.body());
+                    return Result::Err(Error::InvokeError(msg));
+                  }
                   Result::Ok(response)
             })
             .flatten()
