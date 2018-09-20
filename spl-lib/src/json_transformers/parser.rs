@@ -3,6 +3,7 @@ extern crate serde_json;
 use nom::{recognize_float};
 use nom::alphanumeric0;
 use nom::alpha;
+use nom::digit1;
 use nom::types::CompleteStr;
 use json_transformers::syntax::*;
 use nom::Needed; // https://github.com/Geal/nom/issues/780
@@ -16,6 +17,14 @@ named!(id<CompleteStr,String>,
       s.push_str(y.0);
       s
     })));
+
+named!(index<CompleteStr,usize>,
+  do_parse!(
+    x : digit1 >>
+    ({
+      x.parse().unwrap() // Should be safe to unwrap this, as otherwise it would not have parsed digit1
+    })));
+
 
 named!(string<CompleteStr,String>, delimited!(
   char!('\"'),
@@ -71,11 +80,15 @@ named!(map_p<CompleteStr, PatAtom>, do_parse!(
   (PatAtom::Map(Box::new(e)))));
 
 named!(bracketed_rest<CompleteStr, PatAtom>, alt!(
-  bracketed_select_p));
+  bracketed_select_p | bracketed_index_p));
 
 named!(bracketed_select_p<CompleteStr, PatAtom>, do_parse!(
   x : string >>
   (PatAtom::Select(x))));
+
+named!(bracketed_index_p<CompleteStr, PatAtom>, do_parse!(
+  x : index >>
+  (PatAtom::Index(x))));
 
 named!(select_p<CompleteStr, PatAtom>, do_parse!(
   x : id >>
