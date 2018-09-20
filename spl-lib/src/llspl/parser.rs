@@ -6,6 +6,7 @@
 //!
 //! atom ::= pure
 //!        | project
+//!        | download
 //!        | parens
 //!
 //! parens ::= "(" seq ")"
@@ -13,6 +14,8 @@
 //! pure ::= "pure" id
 //!
 //! project ::= "project" transformer // Defined in json_transformers::parse
+//!
+//! download ::= "download" url
 
 /* TODO(arjun):
 
@@ -34,6 +37,12 @@ named!(pure_e<CompleteStr,Expr>,
         name : ws!(alphanumeric1) >>
         (Expr::Pure(name.to_string()))));
 
+named!(download_e<CompleteStr, Expr>,
+    do_parse!(
+        _reserved : tag!("download") >>
+        url : ws!(take_until!(";")) >>
+        (Expr::Download(url.to_string()))));
+
 named!(project_e<CompleteStr,Expr>,
     map!(preceded!(tag!("project"), ws!(json_transformers::parse)),
         |exp: json_transformers::Expr| Expr::Project(exp)));
@@ -53,6 +62,7 @@ named!(seq_e<CompleteStr, Expr>,
 named!(atom_e<CompleteStr,Expr>,
     ws!(alt!(
         pure_e |
+        download_e |
         project_e |
         parens_e)));
 

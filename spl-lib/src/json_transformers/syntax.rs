@@ -4,6 +4,7 @@ extern crate serde_json;
 #[derive(Debug, PartialEq)]
 pub enum PatAtom {
   Select(String),
+  Index(usize),
   Map(Box<Expr>)
 }
 
