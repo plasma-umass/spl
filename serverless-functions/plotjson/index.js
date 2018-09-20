@@ -7,8 +7,8 @@ function plotjson(jsonBody, getQuery) {
   // NOTE(arjun): Supporting query parameters and the body will require a bunch
   // of needless engineering. I suggest we either include the names as part
   // of the body, or assume that they are named "x" and "y"
-  const xName = getQuery.xname || "x",
-        yName = getQuery.yname || "y";
+  const xName = (getQuery.xname === undefined) ? "x" : getQuery.xname,
+        yName = (getQuery.yname === undefined) ? "y" : getQuery.yname;
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {
@@ -70,12 +70,14 @@ function plotjson(jsonBody, getQuery) {
       {
         "orient": "bottom",
         "scale": "xscale",
-        "title": xName
+        "title": xName,
+        "labels" : false,
+        "ticks" : false
       },
       {
         "orient": "left",
         "scale": "yscale",
-        "title": yName
+        "title": yName,
       }
     ],
     "marks": [
@@ -88,7 +90,7 @@ function plotjson(jsonBody, getQuery) {
           "enter": {
             "x": {
               "scale": "xscale",
-              "field": "x"
+              "field": "x",
             },
             "y": {
               "scale": "yscale",
@@ -103,13 +105,19 @@ function plotjson(jsonBody, getQuery) {
     ]
   };
 
-  const view = new vega.View(vega.parse(plot_spec))
-    .logLevel(vega.Warn) // set view logging level
-    .renderer("svg") // set render type (defaults to "canvas")
-    .run(); // update and render the view
+  console.error("Starting parse")
+  var view = new vega.View(vega.parse(plot_spec));
+  console.error("Setting log level")
+  view = view.logLevel(vega.Warn); // set view logging level
+  console.error("Setting renderer")
+  view = view.renderer("svg"); // set render type (defaults to "canvas")
+  console.error("Running...")
+  view.run(); // update and render the view
+  console.error("Converting to image url");
 
   return view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
+    console.error("Replacing and building buf")
     const base64res = url.replace("data:image/png;base64,", "");
     const buf = Buffer.from(base64res, "base64")
     return buf;
@@ -128,3 +136,7 @@ exports.plotjson_GCF = function(req, res) {
     res.status(ret.status).send(ret.message);
   });
 };
+
+
+
+
