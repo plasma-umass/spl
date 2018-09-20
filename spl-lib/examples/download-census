@@ -1,3 +1,3 @@
-download https://people.cs.umass.edu/~dpinckney/test_plotting_data/arrays/data_small.json;
+download https://people.cs.umass.edu/~dpinckney/test_plotting_data/arrays/data_medium.json;
 project $in.map({"x": $in[0], "y": $in[1] });
 pure plotjson
