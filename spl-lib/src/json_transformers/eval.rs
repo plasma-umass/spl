@@ -1,4 +1,4 @@
-use serde_json::Value;
+use serde_json::{Value, Map};
 extern crate serde_json;
 use super::syntax::*;
 
@@ -7,6 +7,9 @@ fn eval_pat(pat: &Pat, value: &Value) -> Option<Value> {
         Pat::Empty => Option::Some(value.clone()),
         Pat::Pat(PatAtom::Select(key), p) => value.as_object()
             .and_then(|map| map.get(key))
+            .and_then(|v| eval_pat(p, v)),
+        Pat::Pat(PatAtom::Index(idx), p) => value.as_array()
+            .and_then(|arr| arr.get(*idx))
             .and_then(|v| eval_pat(p, v)),
         Pat::Pat(PatAtom::Map(f), p) => match value {
             Value::Array(vec) => vec.iter()

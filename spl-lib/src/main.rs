@@ -9,6 +9,7 @@ extern crate hyper_tls;
 extern crate leak;
 extern crate rpds;
 extern crate s3;
+extern crate reqwest;
 
 mod json_transformers;
 mod llspl;
