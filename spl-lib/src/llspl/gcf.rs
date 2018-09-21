@@ -25,7 +25,8 @@ pub struct GoogleCloudFunctions {
     // reference count .client. If we end up using Arc<...> on more fields
     // in the future, it may make sense to reference count the entire structure.
     client: Arc<HttpsClient>,
-    storage: Storage
+    storage: Storage,
+    debug: bool
 }
 
 // Hyper does not set Content-Length: 0 if the body is empty. GCF requires it.
@@ -53,6 +54,9 @@ impl Eval for GoogleCloudFunctions {
     }
 
     fn invoke<'a,'b>(&'b self, name: &'b str, input: Payload) -> EvalResult<'a> {
+        let should_print_exec_id = self.debug;
+        let nameToPrint = String::from(name);
+
         let url = format!("{}{}/", &self.uri_base, name);
         let client = self.client.clone();
         let content_type = get_content_type(&input);
@@ -71,10 +75,19 @@ impl Eval for GoogleCloudFunctions {
         let resp = futures::future::result(req)
             .and_then(move |req| client.request(req).map_err(|err| Error::Hyper(err)))
             .map(move |response| {
+                  if should_print_exec_id {
+                    if let Some(exec_id) = response.headers().get("Function-Execution-Id") {
+                      println!("{},{}",
+                               exec_id.to_str().expect("The execution id is always convertible to a string"),
+                               nameToPrint);
+                    }
+                  }
+
                   if !response.status().is_success() {
                     let msg = format!("{} from  {}, with body {:?}", response.status(), url, response.body());
                     return Result::Err(Error::InvokeError(msg));
                   }
+
                   Result::Ok(response)
             })
             .flatten()
@@ -88,7 +101,7 @@ impl Eval for GoogleCloudFunctions {
 }
 
 impl GoogleCloudFunctions {
-    pub fn new(project: &str, zone: &str, storage: Storage) -> Self  {
+    pub fn new(project: &str, zone: &str, storage: Storage, debug: bool) -> Self  {
         let uri_base = format!("https://{}-{}.cloudfunctions.net/",
             zone, project);
         let https = hyper_tls::HttpsConnector::new(4).unwrap();
@@ -97,7 +110,8 @@ impl GoogleCloudFunctions {
         GoogleCloudFunctions {
             uri_base: uri_base.into_boxed_str(),
             client : Arc::new(client),
-            storage: storage
+            storage: storage,
+            debug: debug
         }
     }
 }

@@ -89,9 +89,15 @@ where
 // name of the function.
 fn main() {
     let args: Vec<String> = env::args().collect();
+    let mut is_debug = false;
     let programs: HashTrieMap<_, _> = args.into_iter()
         .skip(1)
-        .map(|path| {
+        .flat_map(|path| {
+            if path == "-d" {
+                is_debug = true;
+                return None
+            }
+
             let mut file = File::open(&path)
                 .expect(&format!("Could not open {}", path));
             let mut buf = String::new();
@@ -100,7 +106,7 @@ fn main() {
             let expr = llspl::parse(&buf)
                 .expect(&format!("Error parsing {}", path))
                 .1;
-            (path, expr)
+            Some((path, expr))
         })
         .collect();
 
@@ -116,6 +122,7 @@ fn main() {
             String::from("storage.googleapis.com"),
             "plasma-tmp",
         ),
+        is_debug
     );
     let evaluator = Box::new(evaluator).leak();
 
@@ -126,6 +133,9 @@ fn main() {
 
     let server = Server::bind(&addr).serve(service).map_err(|_e| ());
 
-    println!("Listening on http://{}", addr);
+    if !is_debug {
+        println!("Listening on http://{}", addr);
+    }
+
     hyper::rt::run(server)
 }
