@@ -5,13 +5,15 @@ function xml2json(rawXML) {
   return parse.xml2json(`${rawXML}`);
 }
 
+/* TODO (OW)
 function main(params) {
-  //TODO
 }
+*/
 
+/* TODO
 exports.mainAWS = function(event, context, callback) {
-  //TODO
 };
+*/
 
 exports.mainGCP = function(req, res) {
   try {

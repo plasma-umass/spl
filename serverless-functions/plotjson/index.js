@@ -17,8 +17,7 @@ function plotjson(jsonBody, getQuery) {
 
 
   var renamedData = [];
-  for(const i in jsonBody) {
-    const pair = jsonBody[i];
+  for(const pair of jsonBody) {
 
     if((xName in pair) && (yName in pair)) {
       const renamedPair = {x : pair[xName], y : pair[yName]};
@@ -113,9 +112,7 @@ function plotjson(jsonBody, getQuery) {
   return view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
     const base64res = url.replace("data:image/png;base64,", "");
-    const buf = Buffer.from(base64res, "base64")
-    return buf;
-    // return {result: buf, status: 200};
+    return Buffer.from(base64res, "base64");
   }).catch(function(error) { 
     return {message: error, status: 500};
   });
