@@ -105,19 +105,13 @@ function plotjson(jsonBody, getQuery) {
     ]
   };
 
-  console.error("Starting parse")
-  var view = new vega.View(vega.parse(plot_spec));
-  console.error("Setting log level")
-  view = view.logLevel(vega.Warn); // set view logging level
-  console.error("Setting renderer")
-  view = view.renderer("svg"); // set render type (defaults to "canvas")
-  console.error("Running...")
-  view.run(); // update and render the view
-  console.error("Converting to image url");
+  var view = new vega.View(vega.parse(plot_spec))
+      .logLevel(vega.Warn) // set view logging level
+      .renderer("svg") // set render type (defaults to "canvas")
+      .run(); // update and render the view
 
   return view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
-    console.error("Replacing and building buf")
     const base64res = url.replace("data:image/png;base64,", "");
     const buf = Buffer.from(base64res, "base64")
     return buf;
