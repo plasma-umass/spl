@@ -80,6 +80,8 @@ impl Eval for GoogleCloudFunctions {
                       println!("{},{}",
                                exec_id.to_str().expect("The execution id is always convertible to a string"),
                                nameToPrint);
+                    } else {
+                      println!("ERROR,{}", nameToPrint);
                     }
                   }
 
