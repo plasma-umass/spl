@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "umass-plasma",
+  "private_key_id": "23ad7c097011e81f91b27f5d23e8d9b54d74bf3d",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDZE73emQGfErQu\n0HSYPhw8ZtzRDcdHm2Vlgg20wPOsMqGHGUcT551hfktFfvu6mkIsfPEteRrO2i07\nzfAVXUyrJGrbRzhAZpiV0xGNLGqJZxVnhpSdg2D6rTXsMs0ZqGWZusqhK8HZ2VX7\nIhI82LqkE2kPtxBN3R99ioNsoCJmUd79S3OeuEc42kYebkmL+DbqMuJn/dymMfPR\ndTgNbuxpucs1rxQLv5APK82qgGdk1eyG6z4ZFHPkef9CZ0eUHs6Nzm8FFt+HElaZ\nRPLBUcYOpRgKe00FJQ6fForN3l7cps0ThvynGBH3uhJ2oOhuNpl+G+9/NiSBSpf2\nWpwXcLvtAgMBAAECggEACabpEFa5TbtlK5e1N3e7hawFMX5tV+++6G6J8XmK3CM8\nL2eeU3I++zDEZAirZLarLpM3ng/+cygcTsZvYGPPnuR1o95cz/A/5JmH9ED/U7Cz\nsPC49u/6herhtOjlWbi1G8rEa7ooWmlhe1MegHoagmUijMJVBUFJvylDgrb0EJyK\nVnUdEwSL2QvjvjRkaJqiucoz6rGFYRFUHa1UEnlVQYPuWRJg1dYUY59HLIkv8q5r\nity7tan2vrxvSLM/J35PjcegYS9iJHOW63PH/6dQp7fMx3lx2DbuA0sKdCfWnkzB\nE3e/obRG/salVrjaiRIUkBZcH+cNvmKIR+jRo8NHOQKBgQDzIOT5VpuYbOFfOlxY\nawaVVviHAshAoxoxsjbKO9T/G2oB/juscg2tAEX11EDNDyS8av8oqht1xMj07Upp\nlSQfMEu95vxMG6oRVH2zvMRUpnapEWJD7fpAOeYw22qBNS9DtdDBAiBp58LfENiv\ngjlQ6FnA+fYklJub+sDQfpqfXwKBgQDkkcZG9vhpbf50f+g/DbNQttBu/tLbkKXM\nZnPdaGg6A4iM3LlXxKlu8cKh6YtJ38NEBtBFt5EdsF4bRqiQchyt86Ig+Cw0jd5m\nCKBJyQygDadzE/X0Yy3F8SHKSs5I/zK3NIZYVQfCgEWN8L8mp8MoaqFOebnLFk0P\nGH7GzUqEMwKBgHiSZpt0pQNJc9cbBTLgGMq079lcuty7RkFBBUTzuSSufrrwTr2t\nbjTOfuNz2JMZIHnEgjezbJzR82rrxsxnpxtEgztxMsu3qHahtRkO0zq7tvsPYPEZ\nMtLpI8w09DORoZftsdIV8Oc0hYLEQwF/DleecuxtyfDINgd7qmV7c8j3AoGBALPn\nJRfwBZ/+Clyp3CPc5blu2umyOkbFOCqErUekiPy4kT7F8D/rs6x2L0p/ZrmznJ6r\nejyVemvSyI9RcxWWK4qjC4ZFr42B6H2I5piM3RoRBS5nlJxRf9Kfs4fkjy8XZlSa\ny+80phHqIlTRG7MSMmJaYzJATwNRPz/VeNuC89bPAoGAZfASHr8uOFUxHeWPKMOb\nvnujFFPsCdWqGj6jYEJC+amEHxw5cO7/+ylwWY11je+4Jb5iTzQXIL5o3gTtouHV\nmH/qLJxOm3WGOfs/x+sZuT5eeugehPwM1GqryzN9VSzAJJH90WwURAblTA46tFxl\n/Cw0nGTKYwXiQPOzY7FuBeQ=\n-----END PRIVATE KEY-----\n",
+  "client_email": "umass-plasma@appspot.gserviceaccount.com",
+  "client_id": "112923135746401804103",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/umass-plasma%40appspot.gserviceaccount.com"
+}
