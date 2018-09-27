@@ -27,11 +27,14 @@ function setGitHubStatus(config, callback) {
     }
   }, response => {
     response.on('error', err => {
-      console.error('An error occurred while attempting to post build status to GitHub:', JSON.stringify(err));
+      console.error('An error occurred while receiving response from GitHub:', JSON.stringify(err));
       callback();
+    }).on('data', () => {
     }).on('end', () => {
       callback();
     });
+  }).on('error', err => {
+    console.error('An error occurred while making request to GitHub:', JSON.stringify(err));
   });
 
   request.write(JSON.stringify({
@@ -66,11 +69,11 @@ exports.main = function(event, callback) {
         callback();
       }
     }, err => {
-      console.error('Google source repo request failure:', JSON.stringify(err));
+      console.error('Google repo API request failure:', JSON.stringify(err));
       callback();
     });
   }, err => {
-    console.error('Google API auth failure:', JSON.stringify(err));
+    console.error('Google auth API request failure:', JSON.stringify(err));
     callback();
   });
 };
