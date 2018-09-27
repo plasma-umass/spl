@@ -35,12 +35,13 @@ function setGitHubStatus(config, callback) {
     });
   }).on('error', err => {
     console.error('An error occurred while making request to GitHub:', JSON.stringify(err));
+    callback();
   });
 
   request.write(JSON.stringify({
     state: config.state,
     target_url: config.url,
-    description: 'Status update from Google Cloud Build',
+    description: 'Status update from Google Cloud Build.',
     context: 'arjunguha-research-group/google-cloud-build'
   }));
   request.end();
