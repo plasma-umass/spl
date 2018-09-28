@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "deploy": "gcloud functions deploy --trigger-http --region us-east1 --entry-point wait10s_GCF wait10s"
+  }
+}

@@ -1,0 +1,4 @@
+download https://data.lacity.org/api/views/nxs9-385f/rows.csv?accessType=DOWNLOAD;
+pure csv2json;
+project $in.map({"x": $in["Median Age"], "y": $in["Average Household Size"] });
+pure plotjson

@@ -75,7 +75,7 @@ def run_once(llsplName, input = "{}")
     RunData.new(endToEnd, results)
 end
 
-def run_many(llsplName, trials = 10, input = "{}")
+def run_many(llsplName, csvFilename, trials = 10, input = "{}")
     allData = []
     # trials.times do |n|
     #     print "\n\nRun #{n+1} / #{trials}\n=============\n\n"
@@ -97,45 +97,33 @@ def run_many(llsplName, trials = 10, input = "{}")
     # Summarize the data
     # Struct.new(:name, :execId, :gcfTime)
 
-    endToEndSum = 0.0
-    functionsSum = []
-    puts ""
-    # puts allData
-    for runData in allData
-        endToEndSum += runData.endToEnd
+    csvOutput = ""
 
-        if functionsSum == []
-            functionsSum = runData.functionData
-        else
-            functionsSum = runData.functionData.zip(functionsSum).map { |functionRes, sumRes|
-                if functionRes.name != sumRes.name
-                    nil
-                else
-                    NameTime.new(functionRes.name, functionRes.gcfTime + sumRes.gcfTime)
-                end
-            }
+    csvOutput = allData.map  { |runData|
+        endToEnd = runData.endToEnd
+        "#{endToEnd}," + runData.functionData.map { |d| "#{d.gcfTime}" }.join(",")
+    }.join("\n")
 
-            if functionsSum.include?(nil)
-                puts "Error summing data..."
-                break
-            end
-        end
-    end
+    csvOutput = "End-to-end," + allData[0].functionData.map { |d| "#{d.name}" }.join(",") + "\n" + csvOutput
 
-    endToEndMean = endToEndSum / allData.length
-    functionsMean = functionsSum.map { |functionData|
-        NameTime.new(functionData.name, functionData.gcfTime / allData.length)
+    open(csvFilename, 'w') { |f|
+        f.puts csvOutput
     }
-
-    puts ""
-    puts "End to end mean: #{endToEndMean}\n\n"
-
-    functionsMeanDesc = functionsMean.map { |data| "#{data.name},#{data.gcfTime}" }.join("\n")
-
-    puts "Mean of each function:\n#{functionsMeanDesc}"
 end
+
+if ARGV.length < 2
+    puts "Usage: ruby bench.rb llspl-name output-csv-file [numRuns = 10]"
+    exit(1)
+end
+
+if ARGV.length == 3
+    numRuns = ARGV[2].to_i
+else
+    numRuns = 10
+end
+
 
 `gcloud config set functions/region us-east1`
 `pkill spl-lib`
 print `cargo build`
-print run_many("download-census", 100)
+print run_many(ARGV[0], ARGV[1], numRuns)

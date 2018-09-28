@@ -81,7 +81,7 @@ function plotjson(jsonBody, getQuery) {
     ],
     "marks": [
       {
-        "type": "line",
+        "type": "symbol",
         "from": {
           "data": "table"
         },
@@ -97,7 +97,8 @@ function plotjson(jsonBody, getQuery) {
             },
             "strokeWidth": {
               "value": 1
-            }
+            },
+            "shape": {"value": "circle"}
           }
         }
       }
