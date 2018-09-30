@@ -27,14 +27,6 @@ fn extract_split(input: Payload) -> Result<(json::Value, json::Value), Error> {
   }
 }
 
-fn download<'a>(url: &str) -> EvalResult<'a> {
-  use reqwest;
-
-  let mut buf: Vec<u8> = vec![];
-  reqwest::get(url).unwrap().copy_to(&mut buf).unwrap();
-  let payload = Payload::from_vec(buf);
-  Box::new(futures::future::result(Ok(payload)))
-}
 
 pub trait Eval : Sync {
 
@@ -42,6 +34,7 @@ pub trait Eval : Sync {
 
   fn fetch<'a,'b>(&'b self, path: &'b str) -> EvalResult<'a>;
 
+  fn is_benchmarking(&self) -> bool;
 
 
   fn eval<'a>(&'a self, input: Payload, expr: &'a Expr) -> EvalResult<'a> {
@@ -72,6 +65,26 @@ pub trait Eval : Sync {
                 _ => Box::new(futures::failed(Error::JsonEval))
               })),
     }
+  }
+
+  fn download<'a>(&self, url: &str) -> EvalResult<'a> {
+    use reqwest;
+    use std::time::Instant;
+
+    let mut buf: Vec<u8> = vec![];
+
+    let now = Instant::now();
+
+    reqwest::get(url).unwrap().copy_to(&mut buf).unwrap();
+
+    if self.is_benchmarking() {
+      let dt = now.elapsed().as_millis();
+      println!("{},{},{}", "@download", dt, url);
+    }
+
+
+    let payload = Payload::from_vec(buf);
+    Box::new(futures::future::result(Ok(payload)))
   }
 
 }

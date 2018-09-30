@@ -13,7 +13,7 @@ def run_once(llsplName, input = "{}")
         IO.popen(["../target/debug/spl-lib", "-d", llsplName]) { |f|
             while true do
                 splLine = f.gets.chomp
-                pair = splLine.split(",")
+                pair = splLine.split(",", 3)
                 if pair.length == 2
                     if pair[0] == "ERROR"
                         puts "Received error from spl-lib for function #{pair[1]}"
@@ -22,6 +22,9 @@ def run_once(llsplName, input = "{}")
                         puts "Received exec id from spl-lib: #{pair}"
                         execIdsAndNames.push(pair)
                     end
+                elsif pair.length == 3 and pair[0] == "@download"
+                    puts "Received download time from spl-lib: #{pair[1]} ms for #{pair[2]}"
+                    execIdsAndNames.push(pair)
                 else
                     puts "Received spl-lib junk: #{splLine}"
                 end
@@ -52,6 +55,13 @@ def run_once(llsplName, input = "{}")
     results = []
 
     for execIdAndName in execIdsAndNames
+        if execIdAndName.length == 3 and execIdAndName[0] == "@download"
+            dt = execIdAndName[1].to_f / 1000.0
+            url = execIdAndName[2]
+            results.push(NameIdTime.new("download " + url, "@download", dt))
+            next
+        end
+
         execId = execIdAndName[0]
         name = execIdAndName[1]
 

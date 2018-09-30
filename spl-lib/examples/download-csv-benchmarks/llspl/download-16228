@@ -1,0 +1,4 @@
+download https://people.cs.umass.edu/~dpinckney/test_plotting_data/csv/16228.csv;
+pure csv2json;
+project $in.map({"x": $in["time"], "y": $in["voltage"] });
+pure plotjson

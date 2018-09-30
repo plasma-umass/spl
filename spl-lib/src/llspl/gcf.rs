@@ -49,12 +49,16 @@ fn get_content_type<'a, 'b>(payload : &'a Payload) -> &'b str {
 
 impl Eval for GoogleCloudFunctions {
 
+    fn is_benchmarking(&self) -> bool {
+        self.debug
+    }
+
     fn fetch<'a,'b>(&'b self, path: &'b str) -> EvalResult<'a> {
         Box::new(futures::future::result(self.storage.fetch(path)))
     }
 
     fn invoke<'a,'b>(&'b self, name: &'b str, input: Payload) -> EvalResult<'a> {
-        let should_print_exec_id = self.debug;
+        let should_print_exec_id = self.is_benchmarking();
         let nameToPrint = String::from(name);
 
         let url = format!("{}{}/", &self.uri_base, name);
