@@ -1,0 +1,5 @@
+{
+  "scripts": {
+    "deploy": "gcloud functions deploy post2gh --region us-east1 --entry-point mainGCP --trigger-http"
+  }
+}
