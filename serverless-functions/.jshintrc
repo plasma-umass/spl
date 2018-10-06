@@ -3,6 +3,7 @@
   "curly": true,
   "eqeqeq": true,
   "esversion": 6,
+  "expr": true,
   "forin": true,
   "freeze": true,
   "node": true,

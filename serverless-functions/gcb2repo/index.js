@@ -23,21 +23,19 @@ exports.main = function(event, callback) {
     authClient.request({
       url: `https://content-sourcerepo.googleapis.com/v1/projects/umass-plasma/repos/${src.repoName}`
     }).then(val => {
-      console.log('Response received.');
       const repoUrl = val.data.mirrorConfig.url,
         buildState = statusToStateMap[data.status];
 
-      if(buildState) {
-        callback(null, 'SUCCESS');
-      } else {
-        callback(`Unknown status: ${JSON.stringify(data)}`);
-      }
+      buildState ? callback(null, {
+        state: buildState,
+        sha: src.commitSha,
+        target_url: data.logUrl,
+        repo: repoUrl.slice(repoUrl.indexOf('github.com/') + 11, repoUrl.indexOf('.git'))
+      }) : callback(`Unknown status: ${JSON.stringify(data)}`);
     }, err => {
-      console.error('Google repo API request failure:', JSON.stringify(err));
-      callback();
+      callback(`Google repo API request failure: ${JSON.stringify(err)}`);
     });
   }, err => {
-    console.error('Google auth API request failure:', JSON.stringify(err));
-    callback();
+    callback(`Google auth API request failure: ${JSON.stringify(err)}`);
   });
 };
