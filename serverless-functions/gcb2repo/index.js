@@ -16,7 +16,7 @@ authClient = new JWT({
 });
 
 exports.main = function(event, callback) {
-  const data = JSON.parse(String(Buffer.from(event.data.data, 'base64'))),
+  const data = event.data.data ? JSON.parse(String(Buffer.from(event.data.data, 'base64'))) : event.data,
     src = data.sourceProvenance.resolvedRepoSource;
 
   authClient.authorize().then(() => {
