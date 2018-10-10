@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "deploy": "gcloud functions deploy gcb2repo --region us-east1 --entry-point main --trigger-topic cloud-builds"
+  },
+  "dependencies": {
+    "google-auth-library": "2.0.0"
+  }
+}
