@@ -15,9 +15,8 @@ authClient = new JWT({
   scopes: ['https://www.googleapis.com/auth/cloud-platform']
 });
 
-exports.main = function(event, callback) {
-  const data = event.data.data ? JSON.parse(String(Buffer.from(event.data.data, 'base64'))) : event.data,
-    src = data.sourceProvenance.resolvedRepoSource;
+function getRepoInfo(data, callback) {
+  const src = data.sourceProvenance.resolvedRepoSource;
 
   authClient.authorize().then(() => {
     authClient.request({
@@ -26,16 +25,38 @@ exports.main = function(event, callback) {
       const repoUrl = val.data.mirrorConfig.url,
         buildState = statusToStateMap[data.status];
 
-      buildState ? callback(null, {
+      buildState ? callback(200, {
         state: buildState,
         sha: src.commitSha,
         target_url: data.logUrl,
         repo: repoUrl.slice(repoUrl.indexOf('github.com/') + 11, repoUrl.indexOf('.git'))
-      }) : callback(`Unknown status: ${JSON.stringify(data)}`);
+      }) : callback(500, {
+        error: `Unknown status: ${JSON.stringify(data)}`
+      });
     }, err => {
-      callback(`Google repo API request failure: ${JSON.stringify(err)}`);
+      callback(502, {
+        error: `Google repo API request failure: ${JSON.stringify(err)}`
+      });
     });
   }, err => {
-    callback(`Google auth API request failure: ${JSON.stringify(err)}`);
+    callback(502, {
+      error: `Google auth API request failure: ${JSON.stringify(err)}`
+    });
+  });
+}
+
+/* TODO (OW)
+function main(params) {
+}
+*/
+
+/* TODO
+exports.mainAWS = function(event, context, callback) {
+};
+*/
+
+exports.mainGCP = function(req, res) {
+  getRepoInfo(req.body, function(code, message) {
+    res.status(code).json(message);
   });
 };
