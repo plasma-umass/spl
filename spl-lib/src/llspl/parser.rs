@@ -26,26 +26,46 @@
 
 extern crate nom;
 extern crate serde_json;
-use nom::alphanumeric1;
 use nom::types::CompleteStr;
 use json_transformers;
 use super::syntax::*;
 
+named!(string_atom<CompleteStr,String>,
+do_parse!(
+        s : delimited!(char!('"'), is_not!("\""), char!('"')) >>
+        (s.to_string())
+));
+
 named!(pure_e<CompleteStr,Expr>,
     do_parse!(
         _reserved : tag!("pure") >>
-        name : ws!(alphanumeric1) >>
+        name : ws!(string_atom) >>
         (Expr::Pure(name.to_string()))));
 
 named!(download_e<CompleteStr, Expr>,
     do_parse!(
         _reserved : tag!("download") >>
-        url : ws!(take_until!(";")) >>
+        url : ws!(string_atom) >>
         (Expr::Download(url.to_string()))));
 
 named!(project_e<CompleteStr,Expr>,
     map!(preceded!(tag!("project"), ws!(json_transformers::parse)),
         |exp: json_transformers::Expr| Expr::Project(exp)));
+
+named!(split_e<CompleteStr,Expr>,
+    do_parse!(
+        _reserved : tag!("split") >>
+        e: ws!(parens_e) >>
+        (Expr::Split(Box::new(e)))));
+
+named!(if_e<CompleteStr,Expr>,
+    do_parse!(
+        _if : tag!("if") >>
+        cond : ws!(parens_e) >> 
+        t_branch : ws!(delimited!(char!('{'), seq_e, char!('}'))) >>
+        _else : tag!("else") >>
+        f_branch : ws!(delimited!(char!('{'), seq_e, char!('}'))) >>
+        (Expr::If(Box::new(cond), Box::new(t_branch), Box::new(f_branch)))));
 
 named!(parens_e<CompleteStr,Expr>,
     delimited!(tag!("("), seq_e, tag!(")")));
@@ -64,6 +84,8 @@ named!(atom_e<CompleteStr,Expr>,
         pure_e |
         download_e |
         project_e |
+        split_e |
+        if_e |
         parens_e)));
 
 named!(parse_e<CompleteStr,Expr>, do_parse!(
@@ -88,8 +110,14 @@ mod tests {
 
     #[test]
     fn test_pure() {
-        assert!(parse_string("pure foo") ==
-            Expr::Pure("foo".to_string()));
+        assert!(parse_string("pure \"foo-bar\"") ==
+            Expr::Pure("foo-bar".to_string()));
+    }
+
+    #[test]
+    fn test_download() {
+        assert!(parse_string("download \"http://foo.bar\"") ==
+                Expr::Download("http://foo.bar".to_string()));
     }
 
     #[test]
@@ -101,8 +129,22 @@ mod tests {
     }
 
     #[test]
+    fn test_split() {
+        assert!(parse_string("split (pure \"foo\")")  ==
+            Expr::Split(Box::new(Expr::Pure("foo".to_string()))));
+    }
+
+    #[test]
+    fn test_if() {
+        assert!(parse_string("if (pure \"foo\") { pure \"bar\" } else { pure \"baz\" }")  ==
+            Expr::If(Box::new(Expr::Pure("foo".to_string())),
+                Box::new(Expr::Pure("bar".to_string())),
+                Box::new(Expr::Pure("baz".to_string()))));
+    }
+
+    #[test]
     fn test_project_seq_pure() {
-        match parse_string("project $in.x; pure f") {
+        match parse_string("project $in.x; pure \"f\"") {
             Expr::Seq(_e1, _e2) => assert!(true),
             _ => assert!(false)
         }
@@ -110,18 +152,38 @@ mod tests {
 
     #[test]
     fn test_seq() {
-        assert!(parse_string("pure f; pure g") ==
+        assert!(parse_string("pure \"f\"; pure \"g\"") ==
             Expr::Seq(Box::new(Expr::Pure("f".to_string())),
                     Box::new(Expr::Pure("g".to_string()))));
     }
 
     #[test]
+    fn test_seq_download() {
+        assert!(parse_string("download \"f\"; download \"g\"") ==
+            Expr::Seq(Box::new(Expr::Download("f".to_string())),
+                    Box::new(Expr::Download("g".to_string()))));
+    }
+
+
+    #[test]
     fn test_parens() {
-        assert!(parse_string("(pure f; pure g); pure h") ==
+        assert!(parse_string("(pure \"f\"; pure \"g\"); pure \"h\"") ==
         Expr::Seq(
             Box::new(
                 Expr::Seq(Box::new(Expr::Pure("f".to_string())),
                             Box::new(Expr::Pure("g".to_string())))),
             Box::new(Expr::Pure("h".to_string()))));
+    }
+
+    #[test]
+    fn test_pure_in_parens() {
+        assert!(parse_string("(pure \"foo\")") ==
+            Expr::Pure("foo".to_string()));
+    }
+
+    #[test]
+    fn test_download_in_parens() {
+        assert!(parse_string("(download \"http://foo.bar\")") ==
+        Expr::Download("http://foo.bar".to_string()));
     }
 }

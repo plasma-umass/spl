@@ -102,8 +102,18 @@ mod tests {
   }
 
   #[test]
+  fn test_project() {
+    let exp = parse("project { \"x\": 10 }");
+    let result = (MockEval{}).eval(Payload::Json(json!({ "y": 20 })), &exp);
+    assert!(result.wait().unwrap() ==
+      Payload::Json(json!({
+        "x": 10.0
+    })));
+  }
+
+  #[test]
   fn test_seq() {
-    let exp = parse("pure f ; pure f");
+    let exp = parse("pure \"f\"; pure \"f\"");
     let result = (MockEval{}).eval(Payload::Json(json!({ "x": 10 })), &exp);
     assert!(result.wait().unwrap() ==
       Payload::Json(json!({
@@ -115,9 +125,43 @@ mod tests {
     })));
   }
 
+  #[test]
+  fn test_split() {
+    let exp = parse("split (pure \"f\")");
+    let result = (MockEval{}).eval(Payload::Json(json!({ "x": 10, "y": 20 })), &exp);
+    assert!(result.wait().unwrap() ==
+      Payload::Json(json!({
+        "x": {
+          "input": 10,
+          "receiver": "f"
+        },
+        "y": 20
+      })));
+  }
+
+  #[test]
+  fn test_if_true() {
+    let exp = parse("if (project $in.test) { project { \"value\": 1 } } else { project { \"value\": 2 } }");
+    let result = (MockEval{}).eval(Payload::Json(json!({ "x": {"test": true}, "y": 20 })), &exp);
+    assert!(result.wait().unwrap() ==
+      Payload::Json(json!({
+        "value": 1.0
+      })));
+  }
+
+  #[test]
+  fn test_if_false() {
+    let exp = parse("if (project $in.test) { project { \"value\": 1 } } else { project { \"value\": 2 } }");
+    let result = (MockEval{}).eval(Payload::Json(json!({ "x": {"test": false}, "y": 20 })), &exp);
+    assert!(result.wait().unwrap() ==
+      Payload::Json(json!({
+        "value": 2.0
+      })));
+  }
+
  #[test]
   fn test_seq_proj() {
-    let exp = parse("pure f ; project $in.receiver ; pure f");
+    let exp = parse("pure \"f\" ; project $in.receiver ; pure \"f\"");
     let result = (MockEval{}).eval(Payload::Json(json!({ "x": 10 })), &exp);
     assert!(result.wait().unwrap() ==
       Payload::Json(json!({
