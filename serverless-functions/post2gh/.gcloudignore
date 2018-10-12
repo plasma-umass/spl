@@ -1,3 +1,4 @@
 .gcloudignore
 node_modules
 README.md
+package-lock.json
