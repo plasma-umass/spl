@@ -7,6 +7,8 @@
 //! atom ::= pure
 //!        | project
 //!        | download
+//!        | split
+//!        | if
 //!        | parens
 //!
 //! parens ::= "(" seq ")"
@@ -16,12 +18,14 @@
 //! project ::= "project" transformer // Defined in json_transformers::parse
 //!
 //! download ::= "download" url
+//! 
+//! split ::= "split" parens
+//! 
+//! if ::= "if" parens "{" seq "}" "else" "{" seq "}"
 
 /* TODO(arjun):
 
     Fetch(String),
-    Split(Box<Expr>),
-    If(Box<Expr>, Box<Expr>, Box<Expr>)
 */
 
 extern crate nom;
