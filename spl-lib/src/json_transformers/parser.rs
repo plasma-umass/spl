@@ -8,6 +8,15 @@ use nom::types::CompleteStr;
 use json_transformers::syntax::*;
 use nom::Needed; // https://github.com/Geal/nom/issues/780
 
+named!(operator<CompleteStr,Op>,
+  alt!(
+    map!(tag!("=="), |_| Op::Eq) |
+    map!(tag!("!="), |_| Op::NotEq) |
+    map!(tag!(">="), |_| Op::GreaterEq) |
+    map!(tag!("<="), |_| Op::LessEq) |
+    map!(char!('>'), |_| Op::Greater) |
+    map!(char!('<'), |_| Op::Less)));
+
 named!(id<CompleteStr,String>,
   do_parse!(
     x : alpha >>
@@ -127,20 +136,32 @@ named!(
     delimited!(tag!("{"), separated_list!(tag!(","), key_val), tag!("}")),
     |tuple_vec| Expr::Object(tuple_vec))));
 
+named!(
+  binop_e<CompleteStr,Expr>, do_parse!(
+    l: atom_e >>
+    op: operator >>
+    r: atom_e >>
+    (Expr::BinOp(op, Box::new(l), Box::new(r)))));
+
 named!(pat_e<CompleteStr,Expr>,
   map!(pat, |p| Expr::Pat(p)));
 
 named!(
-  expr_e<CompleteStr,Expr>,
-  ws!(alt!(
+  atom_e<CompleteStr,Expr>,
+    ws!(alt!(
     number_e |
     string_e |
     array_e |
     object_e |
     bool_e |
     null_e |
-    pat_e
-    )));
+    pat_e)));
+
+named!(
+  expr_e<CompleteStr,Expr>,
+  ws!(alt!(
+    binop_e |
+    atom_e)));
 
 named!(
   key_val<CompleteStr,(String, Expr)>,
@@ -226,4 +247,69 @@ mod tests {
         Box::new(Pat::Empty))));
   }
 
+  #[test]
+  fn test_binop_eq() {
+    let e = parse_string("$in.x == $in.y");
+    println!("e = {:?}", e);
+    assert!(e == Expr::BinOp(Op::Eq,
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty)))),
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(Pat::Empty))))));
+  }
+
+  #[test]
+  fn test_binop_not_eq() {
+    let e = parse_string("$in.x != $in.y");
+    println!("e = {:?}", e);
+    assert!(e == Expr::BinOp(Op::NotEq,
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty)))),
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(Pat::Empty))))));
+  }
+
+  #[test]
+  fn test_binop_gt() {
+    let e = parse_string("$in.x > $in.y");
+    println!("e = {:?}", e);
+    assert!(e == Expr::BinOp(Op::Greater,
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty)))),
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(Pat::Empty))))));
+  }
+
+  #[test]
+  fn test_binop_lt() {
+    let e = parse_string("$in.x < $in.y");
+    println!("e = {:?}", e);
+    assert!(e == Expr::BinOp(Op::Less,
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty)))),
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(Pat::Empty))))));
+  }
+
+  #[test]
+  fn test_binop_gte() {
+    let e = parse_string("$in.x >= $in.y");
+    println!("e = {:?}", e);
+    assert!(e == Expr::BinOp(Op::GreaterEq,
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty)))),
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(Pat::Empty))))));
+  }
+
+  #[test]
+  fn test_binop_lte() {
+    let e = parse_string("$in.x <= $in.y");
+    println!("e = {:?}", e);
+    assert!(e == Expr::BinOp(Op::LessEq,
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("x")),
+        Box::new(Pat::Empty)))),
+      Box::new(Expr::Pat(Pat::Pat(PatAtom::Select(String::from("y")),
+        Box::new(Pat::Empty))))));
+  }
 }

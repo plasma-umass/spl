@@ -22,6 +22,17 @@ fn eval_pat(pat: &Pat, value: &Value) -> Option<Value> {
     }
 }
 
+fn eval_binop(op: &Op, l: &Expr, r: &Expr, value: &Value) -> Option<Value> {
+    match op {
+        Op::Eq |
+        Op::NotEq |
+        Op::Greater |
+        Op::Less |
+        Op::GreaterEq |
+        Op::LessEq => None
+    }
+}
+
 pub fn eval(expr: &Expr, value: &Value) -> Option<Value> {
     match expr {
         Expr::Pat(p) => eval_pat(&p, value),
@@ -39,6 +50,7 @@ pub fn eval(expr: &Expr, value: &Value) -> Option<Value> {
                 eval(&kv.1, value).map(|v| (k, v))
             })
             .collect::<Option<serde_json::Map<String,Value>>>()
-            .map(|m| Value::Object(m))
+            .map(|m| Value::Object(m)),
+        Expr::BinOp(op, l, r) => eval_binop(op, &*l, &*r, value)
     }
 }
