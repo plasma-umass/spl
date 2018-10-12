@@ -23,13 +23,47 @@ fn eval_pat(pat: &Pat, value: &Value) -> Option<Value> {
 }
 
 fn eval_binop(op: &Op, l: &Expr, r: &Expr, value: &Value) -> Option<Value> {
+    let lv = eval(l, value);
+    let rv = eval(r, value);
     match op {
-        Op::Eq |
-        Op::NotEq |
-        Op::Greater |
-        Op::Less |
-        Op::GreaterEq |
-        Op::LessEq => None
+        Op::Eq => Some(Value::Bool(lv == rv)),
+        Op::NotEq => Some(Value::Bool(lv != rv)),
+        Op::Greater => match (lv, rv) {
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_u64() && rn.is_u64() =>
+                Some(Value::Bool(ln.as_u64() > rn.as_u64())),
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_f64() && rn.is_f64() =>
+                Some(Value::Bool(ln.as_f64() > rn.as_f64())),
+            _ => None
+        }
+        Op::Less => match (lv, rv) {
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_u64() && rn.is_u64() =>
+                Some(Value::Bool(ln.as_u64() < rn.as_u64())),
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_f64() && rn.is_f64() =>
+                Some(Value::Bool(ln.as_f64() < rn.as_f64())),
+            _ => None
+        }
+        Op::GreaterEq => match (lv, rv) {
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_u64() && rn.is_u64() =>
+                Some(Value::Bool(ln.as_u64() >= rn.as_u64())),
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_f64() && rn.is_f64() =>
+                Some(Value::Bool(ln.as_f64() >= rn.as_f64())),
+            _ => None
+        }
+        Op::LessEq => match (lv, rv) {
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_u64() && rn.is_u64() =>
+                Some(Value::Bool(ln.as_u64() <= rn.as_u64())),
+            (Some(Value::Number(ref ln)), Some(Value::Number(ref rn)))
+            if ln.is_f64() && rn.is_f64() =>
+                Some(Value::Bool(ln.as_f64() <= rn.as_f64())),
+            _ => None
+        }
     }
 }
 
@@ -53,4 +87,80 @@ pub fn eval(expr: &Expr, value: &Value) -> Option<Value> {
             .map(|m| Value::Object(m)),
         Expr::BinOp(op, l, r) => eval_binop(op, &*l, &*r, value)
     }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use json_transformers::parser::{parse_string};
+
+  #[test]
+  fn test_binop_eq_true() {
+    let exp = parse_string("$in.x == $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": 10 }));
+    assert!(result.unwrap() == Value::Bool(true));
+  }
+
+  #[test]
+  fn test_binop_eq_false() {
+    let exp = parse_string("$in.x == $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": 1 }));
+    assert!(result.unwrap() == Value::Bool(false));
+  }
+
+  #[test]
+  fn test_binop_eq_strings() {
+    let exp = parse_string("$in.x == $in.y");
+    let result = eval(&exp, &json!({ "x": "abcde", "y": "abcde" }));
+    assert!(result.unwrap() == Value::Bool(true));
+  }
+
+  #[test]
+  fn test_binop_eq_objects() {
+    let exp = parse_string("$in.x == $in.y");
+    let result = eval(&exp, &json!({ "x": { "i": 100 }, "y": { "i": 100 } }));
+    assert!(result.unwrap() == Value::Bool(true));
+  }
+
+  #[test]
+  fn test_binop_neq_true() {
+    let exp = parse_string("$in.x != $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": 1 }));
+    assert!(result.unwrap() == Value::Bool(true));
+  }
+
+  #[test]
+  fn test_binop_neq_false() {
+    let exp = parse_string("$in.x != $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": 10 }));
+    assert!(result.unwrap() == Value::Bool(false));
+  }
+
+  #[test]
+  fn test_binop_neq_different_types() {
+    let exp = parse_string("$in.x != $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": "10" }));
+    assert!(result.unwrap() == Value::Bool(true));
+  }
+
+  #[test]
+  fn test_binop_gt_true() {
+    let exp = parse_string("$in.x > $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": 5 }));
+    assert!(result.unwrap() == Value::Bool(true));
+  }
+
+  #[test]
+  fn test_binop_gt_false() {
+    let exp = parse_string("$in.x > $in.y");
+    let result = eval(&exp, &json!({ "x": 1, "y": 1 }));
+    assert!(result.unwrap() == Value::Bool(false));
+  }
+
+  #[test]
+  fn test_binop_gt_different_types() {
+    let exp = parse_string("$in.x > $in.y");
+    let result = eval(&exp, &json!({ "x": 10, "y": "1" }));
+    assert!(result.is_none());
+  }
 }

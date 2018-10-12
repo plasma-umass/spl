@@ -170,6 +170,10 @@ named!(
 named!(pub parse<CompleteStr, Expr>,
   complete!(expr_e));
 
+pub fn parse_string(input: &str)  -> Expr {
+  return parse(CompleteStr(input)).unwrap().1;
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
