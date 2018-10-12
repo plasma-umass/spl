@@ -1,5 +1,8 @@
 {
   "scripts": {
     "deploy": "gcloud functions deploy bank --region us-east1 --entry-point main --trigger-http"
+  },
+  "dependencies": {
+    "@google-cloud/datastore": "2.0.0"
   }
 }
