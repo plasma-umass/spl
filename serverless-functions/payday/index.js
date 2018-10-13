@@ -9,17 +9,17 @@ exports.main = function(req, res) {
     const transId = dsClient.key(['Transaction', req.body.transId]);
 
     dsClient.get(transId, (err, trans) => {
+      function postTrans(success, failure) {
+        dsClient.insert({ key: transId, data: {} }, (err) => {
+          err ? dsClientTrans.rollback(() => { res.send(failure); }) :
+            dsClientTrans.commit(() => { res.send(success); });
+        });
+      }
+
       if(err || trans) {
         dsClientTrans.rollback(() => { res.send('Invalid transaction ID.'); });
       } else {
-        function postTrans(success, failure) {
-          dsClient.insert({ key: transId, data: {} }, (err) => {
-            err ? dsClientTrans.rollback(() => { res.send(failure); }) :
-              dsClientTrans.commit(() => { res.send(success); });
-          });
-        }
-
-        if(req.body.type === 'deposit') {
+        if(req.body.type.trim().toLowerCase() === 'deposit') {
           const acctNum = dsClient.key(['Account', req.body.to]);
 
           dsClient.get(acctNum, (err, acct) => {
@@ -33,7 +33,7 @@ exports.main = function(req, res) {
               });
             }
           });
-        } else if(req.body.type === 'transfer') {
+        } else if(req.body.type.trim().toLowerCase() === 'transfer') {
           const amnt = req.body.amount, acctNumFrom = dsClient.key(['Account', req.body.from]),
             acctNumTo = dsClient.key(['Account', req.body.to]);
 
