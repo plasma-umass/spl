@@ -2,49 +2,49 @@
 const Datastore = require('@google-cloud/datastore');
 
 exports.main = function(req, res) {
-  const datastoreClient = new Datastore({
+  const dsClient = new Datastore({
     projectId: 'umass-plasma'
   }),
-    datastoreClientTransaction = datastoreClient.transaction();
+    dsClientTrans = dsClient.transaction();
 
-  datastoreClientTransaction.run(function() {
-    const transactionId = datastoreClient.key(['Transaction', req.body.transactionId]);
+  dsClientTrans.run(function() {
+    const transId = dsClient.key(['Transaction', req.body.transId]);
 
-    datastoreClient.get(transactionId, function(err, transaction) {
-      if(err || transaction) {
-        datastoreClientTransaction.rollback(function() {
-          res.send('Invalid \'transactionId\'.');
+    dsClient.get(transId, function(err, trans) {
+      if(err || trans) {
+        dsClientTrans.rollback(function() {
+          res.send('Invalid transaction ID.');
         });
       } else {
         if(req.body.type === 'deposit') {
-          const accountNumber = datastoreClient.key(['Account', req.body.to]);
+          const acctNum = dsClient.key(['Account', req.body.to]);
 
-          datastoreClient.get(accountNumber, function(err, account) {
-            if(err || !account) {
-              datastoreClientTransaction.rollback(function() {
+          dsClient.get(acctNum, function(err, acct) {
+            if(err || !acct) {
+              dsClientTrans.rollback(function() {
                 res.send('Failed to retrieve the account.');
               });
             } else {
-              account.Balance += req.body.amount;
-              datastoreClient.update({
-                key: accountNumber,
-                data: account
+              acct.Balance += req.body.amount;
+              dsClient.update({
+                key: acctNum,
+                data: acct
               }, function(err) {
                 if(err) {
-                  datastoreClientTransaction.rollback(function() {
+                  dsClientTrans.rollback(function() {
                     res.send('Failed to update the account.');
                   });
                 } else {
-                  datastoreClient.insert({
-                    key: transactionId,
+                  dsClient.insert({
+                    key: transId,
                     data: {}
                   }, function(err) {
                     if(err) {
-                      datastoreClientTransaction.rollback(function() {
+                      dsClientTrans.rollback(function() {
                         res.send('Failed to update the account.');
                       });
                     } else {
-                      datastoreClientTransaction.commit(function() {
+                      dsClientTrans.commit(function() {
                         res.send('Deposit complete.');
                       });
                     }
@@ -54,41 +54,41 @@ exports.main = function(req, res) {
             }
           });
         } else if(req.body.type === 'transfer') {
-          const amount = req.body.amount,
-            accountNumberFrom = datastoreClient.key(['Account', req.body.from]),
-            accountNumberTo = datastoreClient.key(['Account', req.body.to]);
+          const amnt = req.body.amount,
+            acctNumFrom = dsClient.key(['Account', req.body.from]),
+            acctNumTo = dsClient.key(['Account', req.body.to]);
 
-          datastoreClient.get([accountNumberFrom, accountNumberTo], function(err, accounts) {
-            if(err || !accounts[0] || !accounts[1]) {
-              datastoreClientTransaction.rollback(function() {
+          dsClient.get([acctNumFrom, acctNumTo], function(err, accts) {
+            if(err || !accts[0] || !accts[1]) {
+              dsClientTrans.rollback(function() {
                 res.send('Failed to retrieve the accounts.');
               });
             } else {
-              if(accounts[0].Balance >= amount) {
-                accounts[0].Balance -= amount;
-                accounts[1].Balance += amount;
-                datastoreClient.update([{
-                  key: accountNumberFrom,
-                  data: accounts[0]
+              if(accts[0].Balance >= amnt) {
+                accts[0].Balance -= amnt;
+                accts[1].Balance += amnt;
+                dsClient.update([{
+                  key: acctNumFrom,
+                  data: accts[0]
                 }, {
-                  key: accountNumberTo,
-                  data: accounts[1]
+                  key: acctNumTo,
+                  data: accts[1]
                 }], function(err) {
                   if(err) {
-                    datastoreClientTransaction.rollback(function() {
+                    dsClientTrans.rollback(function() {
                       res.send('Failed to update the accounts.');
                     });
                   } else {
-                    datastoreClient.insert({
-                      key: transactionId,
+                    dsClient.insert({
+                      key: transId,
                       data: {}
                     }, function(err) {
                       if(err) {
-                        datastoreClientTransaction.rollback(function() {
+                        dsClientTrans.rollback(function() {
                           res.send('Failed to update the accounts.');
                         });
                       } else {
-                        datastoreClientTransaction.commit(function() {
+                        dsClientTrans.commit(function() {
                           res.send('Transfer complete.');
                         });
                       }
@@ -96,14 +96,14 @@ exports.main = function(req, res) {
                   }
                 });
               } else {
-                datastoreClientTransaction.rollback(function() {
+                dsClientTrans.rollback(function() {
                   res.send('Insufficient funds.');
                 });
               }
             }
           });
         } else {
-          datastoreClientTransaction.rollback(function() {
+          dsClientTrans.rollback(function() {
             res.send(`Unknown operation: ${req.body.type}.`);
           });
         }
