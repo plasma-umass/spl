@@ -7,46 +7,30 @@ exports.main = function(req, res) {
   }),
     dsClientTrans = dsClient.transaction();
 
-  dsClientTrans.run(function() {
+  dsClientTrans.run(() => {
     const transId = dsClient.key(['Transaction', req.body.transId]);
 
-    dsClient.get(transId, function(err, trans) {
+    dsClient.get(transId, (err, trans) => {
       if(err || trans) {
-        dsClientTrans.rollback(function() {
-          res.send('Invalid transaction ID.');
-        });
+        dsClientTrans.rollback(() => { res.send('Invalid transaction ID.'); });
       } else {
         if(req.body.type === 'deposit') {
           const acctNum = dsClient.key(['Account', req.body.to]);
 
-          dsClient.get(acctNum, function(err, acct) {
+          dsClient.get(acctNum, (err, acct) => {
             if(err || !acct) {
-              dsClientTrans.rollback(function() {
-                res.send('Failed to retrieve the account.');
-              });
+              dsClientTrans.rollback(() => { res.send('Retrieve account failed.'); });
             } else {
               acct.Balance += req.body.amount;
-              dsClient.update({
-                key: acctNum,
-                data: acct
-              }, function(err) {
+              dsClient.update({ key: acctNum, data: acct }, err => {
                 if(err) {
-                  dsClientTrans.rollback(function() {
-                    res.send('Failed to update the account.');
-                  });
+                  dsClientTrans.rollback(() => { res.send('Update account failed.'); });
                 } else {
-                  dsClient.insert({
-                    key: transId,
-                    data: {}
-                  }, function(err) {
+                  dsClient.insert({ key: transId, data: {} }, err => {
                     if(err) {
-                      dsClientTrans.rollback(function() {
-                        res.send('Failed to update the account.');
-                      });
+                      dsClientTrans.rollback(() => { res.send('Update account failed.'); });
                     } else {
-                      dsClientTrans.commit(function() {
-                        res.send('Deposit complete.');
-                      });
+                      dsClientTrans.commit(() => { res.send('Deposit complete.'); });
                     }
                   });
                 }
@@ -58,54 +42,33 @@ exports.main = function(req, res) {
             acctNumFrom = dsClient.key(['Account', req.body.from]),
             acctNumTo = dsClient.key(['Account', req.body.to]);
 
-          dsClient.get([acctNumFrom, acctNumTo], function(err, accts) {
+          dsClient.get([acctNumFrom, acctNumTo], (err, accts) => {
             if(err || !accts[0] || !accts[1]) {
-              dsClientTrans.rollback(function() {
-                res.send('Failed to retrieve the accounts.');
-              });
+              dsClientTrans.rollback(() => { res.send('Retrieve accounts failed.'); });
             } else {
               if(accts[0].Balance >= amnt) {
-                accts[0].Balance -= amnt;
-                accts[1].Balance += amnt;
-                dsClient.update([{
-                  key: acctNumFrom,
-                  data: accts[0]
-                }, {
-                  key: acctNumTo,
-                  data: accts[1]
-                }], function(err) {
+                accts[0].Balance -= amnt; accts[1].Balance += amnt;
+                dsClient.update([{ key: acctNumFrom, data: accts[0] },
+                  { key: acctNumTo, data: accts[1] }], err => {
                   if(err) {
-                    dsClientTrans.rollback(function() {
-                      res.send('Failed to update the accounts.');
-                    });
+                    dsClientTrans.rollback(() => { res.send('Update accounts failed.'); });
                   } else {
-                    dsClient.insert({
-                      key: transId,
-                      data: {}
-                    }, function(err) {
+                    dsClient.insert({ key: transId, data: {} }, err => {
                       if(err) {
-                        dsClientTrans.rollback(function() {
-                          res.send('Failed to update the accounts.');
-                        });
+                        dsClientTrans.rollback(() => { res.send('Update accounts failed.'); });
                       } else {
-                        dsClientTrans.commit(function() {
-                          res.send('Transfer complete.');
-                        });
+                        dsClientTrans.commit(() => { res.send('Transfer complete.'); });
                       }
                     });
                   }
                 });
               } else {
-                dsClientTrans.rollback(function() {
-                  res.send('Insufficient funds.');
-                });
+                dsClientTrans.rollback(() => { res.send('Insufficient funds.'); });
               }
             }
           });
         } else {
-          dsClientTrans.rollback(function() {
-            res.send(`Unknown operation: ${req.body.type}.`);
-          });
+          dsClientTrans.rollback(() => { res.send(`Unknown operation: ${req.body.type}.`); });
         }
       }
     });
