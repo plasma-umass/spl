@@ -2,9 +2,7 @@
 const Datastore = require('@google-cloud/datastore');
 
 exports.main = function(req, res) {
-  const dsClient = new Datastore({
-    projectId: 'umass-plasma'
-  }),
+  const dsClient = new Datastore({ projectId: 'umass-plasma' }),
     dsClientTrans = dsClient.transaction();
 
   dsClientTrans.run(() => {
@@ -14,6 +12,13 @@ exports.main = function(req, res) {
       if(err || trans) {
         dsClientTrans.rollback(() => { res.send('Invalid transaction ID.'); });
       } else {
+        function postTrans(success, failure) {
+          dsClient.insert({ key: transId, data: {} }, (err) => {
+            err ? dsClientTrans.rollback(() => { res.send(failure); }) :
+              dsClientTrans.commit(() => { res.send(success); });
+          });
+        }
+
         if(req.body.type === 'deposit') {
           const acctNum = dsClient.key(['Account', req.body.to]);
 
@@ -22,24 +27,14 @@ exports.main = function(req, res) {
               dsClientTrans.rollback(() => { res.send('Retrieve account failed.'); });
             } else {
               acct.Balance += req.body.amount;
-              dsClient.update({ key: acctNum, data: acct }, err => {
-                if(err) {
-                  dsClientTrans.rollback(() => { res.send('Update account failed.'); });
-                } else {
-                  dsClient.insert({ key: transId, data: {} }, err => {
-                    if(err) {
-                      dsClientTrans.rollback(() => { res.send('Update account failed.'); });
-                    } else {
-                      dsClientTrans.commit(() => { res.send('Deposit complete.'); });
-                    }
-                  });
-                }
+              dsClient.update({ key: acctNum, data: acct }, (err) => {
+                err ? dsClientTrans.rollback(() => { res.send('Update account failed.'); }) :
+                  postTrans('Deposit complete.', 'Update account failed.');
               });
             }
           });
         } else if(req.body.type === 'transfer') {
-          const amnt = req.body.amount,
-            acctNumFrom = dsClient.key(['Account', req.body.from]),
+          const amnt = req.body.amount, acctNumFrom = dsClient.key(['Account', req.body.from]),
             acctNumTo = dsClient.key(['Account', req.body.to]);
 
           dsClient.get([acctNumFrom, acctNumTo], (err, accts) => {
@@ -49,18 +44,9 @@ exports.main = function(req, res) {
               if(accts[0].Balance >= amnt) {
                 accts[0].Balance -= amnt; accts[1].Balance += amnt;
                 dsClient.update([{ key: acctNumFrom, data: accts[0] },
-                  { key: acctNumTo, data: accts[1] }], err => {
-                  if(err) {
-                    dsClientTrans.rollback(() => { res.send('Update accounts failed.'); });
-                  } else {
-                    dsClient.insert({ key: transId, data: {} }, err => {
-                      if(err) {
-                        dsClientTrans.rollback(() => { res.send('Update accounts failed.'); });
-                      } else {
-                        dsClientTrans.commit(() => { res.send('Transfer complete.'); });
-                      }
-                    });
-                  }
+                  { key: acctNumTo, data: accts[1] }], (err) => {
+                  err ? dsClientTrans.rollback(() => { res.send('Update accounts failed.'); }) :
+                    postTrans('Transfer complete.', 'Update accounts failed.');
                 });
               } else {
                 dsClientTrans.rollback(() => { res.send('Insufficient funds.'); });
