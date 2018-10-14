@@ -23,6 +23,15 @@ pub enum Payload {
     Json(serde_json::Value)
 }
 
+impl Clone for Payload {
+    fn clone(&self) -> Self {
+        match self {
+            Payload::Chunk(c) => Payload::Chunk(hyper::Chunk::from(c.to_vec())),
+            Payload::Json(v) => Payload::Json(v.clone())
+        }
+    }
+}
+
 impl PartialEq for Payload {
   fn eq(&self, other: &Payload) -> bool {
       match (self, other) {
