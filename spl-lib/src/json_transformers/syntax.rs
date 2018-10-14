@@ -15,6 +15,16 @@ pub enum Pat {
 }
 
 #[derive(Debug, PartialEq)]
+pub enum Op {
+  Eq,
+  NotEq,
+  Greater,
+  Less,
+  GreaterEq,
+  LessEq
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Expr {
     Pat(Pat),
     Null,
@@ -22,5 +32,6 @@ pub enum Expr {
     Number(Number),
     String(String),
     Array(Vec<Expr>),
-    Object(Vec<(String,Expr)>)
+    Object(Vec<(String,Expr)>),
+    BinOp(Op, Box<Expr>, Box<Expr>)
 }
