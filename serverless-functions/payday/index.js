@@ -9,13 +9,6 @@ exports.main = function(req, res) {
     let transId = dsClient.key(['Transaction', req.body.transId]);
 
     dsClient.get(transId, function(err, trans) {
-      function postTrans(success, failure) {
-        dsClient.insert({ key: transId, data: {} }, function(err) {
-          err ? dsClientTrans.rollback(function() { res.send(failure); }) :
-            dsClientTrans.commit(function() { res.send(success); });
-        });
-      }
-
       if(err || trans) {
         dsClientTrans.rollback(function() { res.send('Invalid transaction ID.'); });
       } else {
@@ -27,9 +20,10 @@ exports.main = function(req, res) {
               dsClientTrans.rollback(function() { res.send('Retrieve account failed.'); });
             } else {
               acct.Balance += req.body.amount;
-              dsClient.update({ key: acctNum, data: acct }, function(err) {
-                err ? dsClientTrans.rollback(function() { res.send('Update account failed.'); }) :
-                  postTrans('Deposit complete.', 'Update account failed.');
+              dsClient.update({ key: acctNum, data: acct }, function() {
+                dsClient.insert({ key: transId, data: {} }, function() {
+                  dsClientTrans.commit(function() { res.send('Deposit complete.'); });
+                });
               });
             }
           });
@@ -45,9 +39,10 @@ exports.main = function(req, res) {
               if(accts[0].Balance >= amnt) {
                 accts[0].Balance -= amnt; accts[1].Balance += amnt;
                 dsClient.update([{ key: acctNumFrom, data: accts[0] },
-                  { key: acctNumTo, data: accts[1] }], function(err) {
-                  err ? dsClientTrans.rollback(function() { res.send('Update accounts failed.'); }) :
-                    postTrans('Transfer complete.', 'Update accounts failed.');
+                  { key: acctNumTo, data: accts[1] }], function() {
+                  dsClient.insert({ key: transId, data: {} }, function() {
+                    dsClientTrans.commit(function() { res.send('Transfer complete.'); });
+                  });
                 });
               } else {
                 dsClientTrans.rollback(function() { res.send('Insufficient funds.'); });
