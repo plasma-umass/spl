@@ -2,8 +2,8 @@
 let Datastore = require('@google-cloud/datastore');
 
 exports.main = function(req, res) {
-  let dsClient = new Datastore({ projectId: 'umass-plasma' }),
-    dsClientTrans = dsClient.transaction();
+  let dsClient = new Datastore({ projectId: 'umass-plasma' });
+  let dsClientTrans = dsClient.transaction();
 
   dsClientTrans.run(function() {
     let transId = dsClient.key(['Transaction', req.body.transId]);
@@ -19,7 +19,7 @@ exports.main = function(req, res) {
       if(err || trans) {
         dsClientTrans.rollback(function() { res.send('Invalid transaction ID.'); });
       } else {
-        if(req.body.type.trim().toLowerCase() === 'deposit') {
+        if(req.body.type === 'deposit') {
           let acctNum = dsClient.key(['Account', req.body.to]);
 
           dsClient.get(acctNum, function(err, acct) {
@@ -33,9 +33,10 @@ exports.main = function(req, res) {
               });
             }
           });
-        } else if(req.body.type.trim().toLowerCase() === 'transfer') {
-          let amnt = req.body.amount, acctNumFrom = dsClient.key(['Account', req.body.from]),
-            acctNumTo = dsClient.key(['Account', req.body.to]);
+        } else if(req.body.type === 'transfer') {
+          let amnt = req.body.amount;
+          let acctNumFrom = dsClient.key(['Account', req.body.from]);
+          let acctNumTo = dsClient.key(['Account', req.body.to]);
 
           dsClient.get([acctNumFrom, acctNumTo], function(err, accts) {
             if(err || !accts[0] || !accts[1]) {
