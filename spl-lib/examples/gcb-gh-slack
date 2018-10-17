@@ -1,0 +1,14 @@
+project {
+  "state": $in.state,
+  "sha":"5c77f0337992542fa84c9e236b7e1f4fbf20ce59",
+  "target_url":"https://console.cloud.google.com/gcr/builds/68b8a5c0-0a85-4f88-842b-648243be0380?project=494493709319",
+  "repo":"plasma-umass/spl"
+  };
+project { "x": $in, "y": $in };
+split (pure "post2gh");
+if (project $in.y.state == "failure") {
+  project { "channel": "serverless", "text": "Build failed" };
+  pure "post2slack"
+} else {
+  project { "status": $in.y.state }
+}
