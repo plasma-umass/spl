@@ -12,13 +12,17 @@ function setGitHubStatus(config, callback) {
     }
   }, response => {
     response.on('error', err => {
-      callback(502, `An error occurred while receiving response from GitHub: ${JSON.stringify(err)}`);
+      callback(502, {
+        error: `An error occurred while receiving response from GitHub: ${JSON.stringify(err)}`
+      });
     }).on('data', () => {
     }).on('end', () => {
-      callback(204, '');
+      callback(200, {});
     });
   }).on('error', err => {
-    callback(502, `An error occurred while making request to GitHub: ${JSON.stringify(err)}`);
+    callback(502, {
+      error: `An error occurred while making request to GitHub: ${JSON.stringify(err)}`
+    });
   });
 
   request.write(JSON.stringify({
@@ -43,6 +47,6 @@ exports.mainAWS = function(event, context, callback) {
 exports.mainGCP = function(req, res) {
   res.set('content-type', 'text/plain');
   setGitHubStatus(req.body, function(code, message) {
-    res.status(code).send(message);
+    res.status(code).json(message);
   });
 };
