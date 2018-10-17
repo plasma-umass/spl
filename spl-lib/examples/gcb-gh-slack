@@ -1,9 +1,15 @@
 project {
-  "state": $in.state,
-  "sha":"5c77f0337992542fa84c9e236b7e1f4fbf20ce59",
-  "target_url":"https://console.cloud.google.com/gcr/builds/68b8a5c0-0a85-4f88-842b-648243be0380?project=494493709319",
-  "repo":"plasma-umass/spl"
-  };
+  "status": $in.status,
+  "sourceProvenance": {
+    "resolvedRepoSource": {
+        "projectId": "umass-plasma",
+        "repoName": "github-plasma-umass-spl",
+        "commitSha": "59f0a2e2abe5f83df8d45fc6920975932f5f0264"
+    }
+  },
+  "logUrl": "https://console.cloud.google.com/gcr/builds/fd7865e4-1725-425d-bcd8-d70e867f9d18?project=494493709319"
+};
+pure "gcb2repo";
 project { "x": $in, "y": $in };
 split (pure "post2gh");
 if (project $in.y.state == "failure") {
