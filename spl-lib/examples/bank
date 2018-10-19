@@ -1,6 +1,23 @@
-project { "type": "deposit", "to": 5644406560391168, "amount": 100, "transId": "17"};
-pure "bank";
-project { "type": "transfer", "from": 5644406560391168, "to": 5639445604728832, "amount": 50, "transId": "18"};
-pure "bank";
-project { "type": "transfer", "from": 5644406560391168, "to": 5629499534213120, "amount": 50, "transId": "19"};
+project { "x": {
+  "type": "deposit",
+  "to": $in.acct1,
+  "amount": $in.amnt1,
+  "transId": $in.tId1
+}, "y": $in};
+split(pure "bank");
+project { "x": {
+  "type": "transfer",
+  "from": $in.y.acct1,
+  "to": $in.y.acct2,
+  "amount": $in.y.amnt2,
+  "transId": $in.y.tId2
+}, "y": $in.y};
+split(pure "bank");
+project {
+  "type": "transfer",
+  "from": $in.y.acct1,
+  "to": $in.y.acct3,
+  "amount": $in.y.amnt3,
+  "transId": $in.y.tId3
+};
 pure "bank"
