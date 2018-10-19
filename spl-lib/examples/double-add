@@ -1,1 +1,1 @@
-project { "x": 100, "y": 200 }; pure adder; project { "x": $in.result, "y": $in.result }; pure adder
+project { "x": 100, "y": 200 }; pure "adder"; project { "x": $in.result, "y": $in.result }; pure "adder"

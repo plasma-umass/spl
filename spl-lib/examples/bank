@@ -1,0 +1,6 @@
+project { "type": "deposit", "to": 5644406560391168, "amount": 100, "transId": "17"};
+pure "bank";
+project { "type": "transfer", "from": 5644406560391168, "to": 5639445604728832, "amount": 50, "transId": "18"};
+pure "bank";
+project { "type": "transfer", "from": 5644406560391168, "to": 5629499534213120, "amount": 50, "transId": "19"};
+pure "bank"
