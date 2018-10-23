@@ -2,7 +2,6 @@
 extern crate nom;
 #[macro_use]
 extern crate serde_json;
-extern crate chrono;
 extern crate futures;
 extern crate hyper;
 extern crate hyper_tls;

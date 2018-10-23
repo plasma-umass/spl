@@ -177,4 +177,12 @@ mod tests {
     assert!(result.wait().unwrap() == Payload::Json(output));
   }
 
+  #[test]
+  fn test_proj_double_select() {
+    let exp = parse("project $in.x.y");
+    let input = json!({ "x": { "y": 10 } });
+    let output = json!(10);
+    let result = (MockEval{}).eval(Payload::Json(input), &exp);
+    assert!(result.wait().unwrap() == Payload::Json(output));
+  }
 }

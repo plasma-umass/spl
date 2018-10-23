@@ -1,0 +1,20 @@
+project {
+  "status": $in.status,
+  "sourceProvenance": {
+    "resolvedRepoSource": {
+        "projectId": "umass-plasma",
+        "repoName": "github-plasma-umass-spl",
+        "commitSha": "59f0a2e2abe5f83df8d45fc6920975932f5f0264"
+    }
+  },
+  "logUrl": "https://console.cloud.google.com/gcr/builds/fd7865e4-1725-425d-bcd8-d70e867f9d18?project=494493709319"
+};
+pure "gcb2repo";
+project { "x": $in, "y": $in };
+split (pure "post2gh");
+if (project $in.y.state == "failure") {
+  project { "channel": "serverless", "text": "Build failed" };
+  pure "post2slack"
+} else {
+  project { "status": $in.y.state }
+}
