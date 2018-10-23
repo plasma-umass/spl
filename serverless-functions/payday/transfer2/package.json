@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "deploy": "gcloud functions deploy transfer2 --region us-east1 --entry-point transfer2 --trigger-http"
+  },
+  "dependencies": {
+    "request": "2.88.0",
+    "request-promise-native": "1.0.5"
+  }
+}
