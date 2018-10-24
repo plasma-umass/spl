@@ -7,14 +7,6 @@ pub type EvalResult<'a> = Box<Future<Item = Payload, Error = Error> + Send + 'a>
 
 use serde_json as json;
 
-fn eval_json(jt_expr: &json_transformers::Expr,
-  input: Payload) -> Result<Payload, Error> {
-  let in_json = input.to_json()?;
-  let out_json = json_transformers::eval(jt_expr, &in_json)
-    .ok_or(Error::JsonEval)?;
-  Ok(Payload::Json(out_json))
-}
-
 fn extract_split(input: Payload) -> Result<(json::Value, json::Value), Error> {
   let in_json = input.to_json()?;
   
@@ -48,7 +40,7 @@ pub trait Eval : Sync {
           .and_then(move |result| self.eval(result, e2))),
       Expr::Fetch(path) => self.fetch(path),
       Expr::Project(jt_expr) =>
-        Box::new(futures::future::result(eval_json(&jt_expr, input))),
+        Box::new(futures::future::result(self.eval_json(&jt_expr, input))),
       Expr::Split(e) =>
         Box::new(futures::future::result(extract_split(input))
           .and_then(move |(x,y)|
@@ -85,6 +77,23 @@ pub trait Eval : Sync {
 
     let payload = Payload::from_vec(buf);
     Box::new(futures::future::result(Ok(payload)))
+  }
+
+  fn eval_json(&self, jt_expr: &json_transformers::Expr, input: Payload) -> Result<Payload, Error> {
+    use std::time::Instant;
+    let now = Instant::now();
+
+    let in_json = input.to_json()?;
+    let out_json = json_transformers::eval(jt_expr, &in_json)
+      .ok_or(Error::JsonEval)?;
+    let ok_res = Ok(Payload::Json(out_json));
+
+    if self.is_benchmarking() {
+      let dt = now.elapsed().as_millis();
+      println!("{},{}", "@json", dt);
+    }
+
+    ok_res
   }
 
 }
