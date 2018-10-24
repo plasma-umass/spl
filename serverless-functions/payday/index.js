@@ -10,7 +10,7 @@ exports.main = function(req, res) {
 
     dsClientTrans.get(transId, function(err, trans) {
       if(err || trans) {
-        dsClientTrans.rollback(function() { res.json('Invalid transaction ID.'); });
+        dsClientTrans.rollback(function() { res.send(false); });
       } else {
         if(req.body.type === 'deposit') {
           let acctNum = dsClient.key(['Account', req.body.to]);
@@ -19,7 +19,7 @@ exports.main = function(req, res) {
             acct.Balance += req.body.amount;
             dsClientTrans.save({ key: acctNum, data: acct });
             dsClientTrans.save({ key: transId, data: {} });
-            dsClientTrans.commit(function() { res.json('Deposit complete.'); });
+            dsClientTrans.commit(function() { res.send(true); });
           });
         } else if(req.body.type === 'transfer') {
           let amnt = req.body.amount;
@@ -33,15 +33,13 @@ exports.main = function(req, res) {
               dsClientTrans.save([{ key: acctNumFrom, data: accts[0] },
                 { key: acctNumTo, data: accts[1] }]);
               dsClientTrans.save({ key: transId, data: {} });
-              dsClientTrans.commit(function() { res.json('Transfer complete.'); });
+              dsClientTrans.commit(function() { res.send(true); });
             } else {
-              dsClientTrans.rollback(function() { res.json('Insufficient funds.'); });
+              dsClientTrans.rollback(function() { res.send(false); });
             }
           });
         } else {
-          dsClientTrans.rollback(function() {
-            res.json('Unknown operation: ' + req.body.type);
-          });
+          dsClientTrans.rollback(function() { res.send(false); });
         }
       }
     });
