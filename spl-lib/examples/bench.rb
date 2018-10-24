@@ -10,11 +10,17 @@ def run_once(llsplName, input = "{}")
     puts "Starting spl-lib..."
     receivedError = false
     t = Thread.start do
-        IO.popen(["../target/debug/spl-lib", "-d", llsplName]) { |f|
+        IO.popen(["../target/release/spl-lib", "-d", llsplName]) { |f|
             while true do
                 splLine = f.gets.chomp
                 pair = splLine.split(",", 3)
-                if pair.length == 2
+                if pair.length == 2 and pair[0] == "@json"
+                    puts "Received json time from spl-lib: #{pair[1]} ms for #{pair[2]}"
+                    execIdsAndNames.push(pair)
+                elsif pair.length == 3 and pair[0] == "@download"
+                    puts "Received download time from spl-lib: #{pair[1]} ms for #{pair[2]}"
+                    execIdsAndNames.push(pair)
+                elsif pair.length == 2
                     if pair[0] == "ERROR"
                         puts "Received error from spl-lib for function #{pair[1]}"
                         receivedError = true
@@ -22,9 +28,6 @@ def run_once(llsplName, input = "{}")
                         puts "Received exec id from spl-lib: #{pair}"
                         execIdsAndNames.push(pair)
                     end
-                elsif pair.length == 3 and pair[0] == "@download"
-                    puts "Received download time from spl-lib: #{pair[1]} ms for #{pair[2]}"
-                    execIdsAndNames.push(pair)
                 else
                     puts "Received spl-lib junk: #{splLine}"
                 end
@@ -59,6 +62,10 @@ def run_once(llsplName, input = "{}")
             dt = execIdAndName[1].to_f / 1000.0
             url = execIdAndName[2]
             results.push(NameIdTime.new("download " + url, "@download", dt))
+            next
+        elsif execIdAndName.length == 2 and execIdAndName[0] == "@json"
+            dt = execIdAndName[1].to_f / 1000.0
+            results.push(NameIdTime.new("json transform", "@json", dt))
             next
         end
 
@@ -135,5 +142,5 @@ end
 
 `gcloud config set functions/region us-east1`
 `pkill spl-lib`
-print `cargo build`
+print `cargo build --release`
 print run_many(ARGV[0], ARGV[1], numRuns)

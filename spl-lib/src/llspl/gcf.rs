@@ -59,7 +59,7 @@ impl Eval for GoogleCloudFunctions {
 
     fn invoke<'a,'b>(&'b self, name: &'b str, input: Payload) -> EvalResult<'a> {
         let should_print_exec_id = self.is_benchmarking();
-        let nameToPrint = String::from(name);
+        let name_to_print = String::from(name);
 
         let url = format!("{}{}/", &self.uri_base, name);
         let client = self.client.clone();
@@ -83,9 +83,9 @@ impl Eval for GoogleCloudFunctions {
                     if let Some(exec_id) = response.headers().get("Function-Execution-Id") {
                       println!("{},{}",
                                exec_id.to_str().expect("The execution id is always convertible to a string"),
-                               nameToPrint);
+                               name_to_print);
                     } else {
-                      println!("ERROR,{}", nameToPrint);
+                      println!("ERROR,{}", name_to_print);
                     }
                   }
 
