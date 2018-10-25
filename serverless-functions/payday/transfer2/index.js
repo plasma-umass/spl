@@ -8,6 +8,6 @@ exports.transfer2 = function(req, res) {
   .then(function() {
     request.post({ url:'https://us-east1-umass-plasma.cloudfunctions.net/bank',
       json: { type: 'transfer', from: from, to: to2, amount: amnt2, transId: tId2 }})
-    .then(function() { res.send('Transfers complete.'); });
+    .then(function() { res.send(true); });
   });
 };
