@@ -5,17 +5,15 @@ function csv2json(data) {
   return csv.toArray(data.toString());
 }
 
-/* TODO (OW)
-function main(params) {
-}
-*/
-
-/* TODO
 exports.mainAWS = function(event, context, callback) {
+  try {
+    callback(null, csv2json(JSON.parse(event.csv)));
+  } catch(e) {
+    callback(e);
+  }
 };
-*/
 
-exports.csv2json_GCF = function(req, res) {
+exports.mainGCP = function(req, res) {
   try {
     res.status(200).send(JSON.stringify(csv2json(req.body)));
   } catch(e) {
