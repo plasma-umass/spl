@@ -3,6 +3,6 @@
     "deploy": "gcloud functions deploy plotjson --trigger-http --region us-east1 --entry-point mainGCP"
   },
   "dependencies": {
-    "vega": "4.2.0"
+    "vega": "4.3.0"
   }
 }
