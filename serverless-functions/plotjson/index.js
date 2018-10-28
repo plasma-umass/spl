@@ -1,31 +1,27 @@
 "use strict";
-
 const vega = require("vega");
 
-
 function plotjson(jsonBody, getQuery) {
-  // NOTE(arjun): Supporting query parameters and the body will require a bunch
-  // of needless engineering. I suggest we either include the names as part
-  // of the body, or assume that they are named "x" and "y"
-  const xName = (getQuery.xname === undefined) ? "x" : getQuery.xname,
-        yName = (getQuery.yname === undefined) ? "y" : getQuery.yname;
+  const xName = (getQuery && getQuery.xname) || "x",
+        yName = (getQuery && getQuery.yname) || "y",
+        renamedData = [];
 
   // Validate that JSON is an array
   if(!Array.isArray(jsonBody)) {
-    return Promise.reject({message: "JSON input is not an array, instead we received: " + JSON.stringify(jsonBody), status: 400});
+    return Promise.reject({
+      message: `JSON input is not an array, instead we received: ${JSON.stringify(jsonBody)}`,
+      status: 400
+    });
   }
 
-
-  var renamedData = [];
   for(const pair of jsonBody) {
-
     if((xName in pair) && (yName in pair)) {
-      const renamedPair = {x : pair[xName], y : pair[yName]};
-      renamedData.push(renamedPair);
+      renamedData.push({x: pair[xName], y: pair[yName]});
     } else {
       return Promise.reject({
-        message: `JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`, 
-        status: 400});
+        message: `JSON input pair ${JSON.stringify(pair)} does not contain both required keys "${xName}" and "${yName}".`,
+        status: 400
+      });
     }
   }
 
@@ -37,97 +33,93 @@ function plotjson(jsonBody, getQuery) {
     "config": {
       "background": "white"
     },
-    "data": [
-      {
-        "name": "table",
-        "values": renamedData
+    "data": [{
+      "name": "table",
+      "values": renamedData
+    }],
+    "scales": [{
+      "name": "xscale",
+      "type": "point",
+      "range": "width",
+      "domain": {
+        "data": "table",
+        "field": "x"
       }
-    ],
-    "scales": [
-      {
-        "name": "xscale",
-        "type": "point",
-        "range": "width",
-        "domain": {
-          "data": "table",
-          "field": "x"
-        }
+    }, {
+      "name": "yscale",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "zero": true,
+      "domain": {
+        "data": "table",
+        "field": "y"
+      }
+    }],
+    "axes": [{
+      "orient": "bottom",
+      "scale": "xscale",
+      "title": xName,
+      "labels" : false,
+      "ticks" : false
+    }, {
+      "orient": "left",
+       "scale": "yscale",
+       "title": yName,
+    }],
+    "marks": [{
+      "type": "line",
+      "from": {
+        "data": "table"
       },
-      {
-        "name": "yscale",
-        "type": "linear",
-        "range": "height",
-        "nice": true,
-        "zero": true,
-        "domain": {
-          "data": "table",
-          "field": "y"
-        }
-      }
-    ],
-    "axes": [
-      {
-        "orient": "bottom",
-        "scale": "xscale",
-        "title": xName,
-        "labels" : false,
-        "ticks" : false
-      },
-      {
-        "orient": "left",
-        "scale": "yscale",
-        "title": yName,
-      }
-    ],
-    "marks": [
-      {
-        "type": "line",
-        "from": {
-          "data": "table"
-        },
-        "encode": {
-          "enter": {
-            "x": {
-              "scale": "xscale",
-              "field": "x",
-            },
-            "y": {
-              "scale": "yscale",
-              "field": "y"
-            },
-            "strokeWidth": {
-              "value": 1
-            }
+      "encode": {
+        "enter": {
+          "x": {
+            "scale": "xscale",
+            "field": "x",
+          },
+          "y": {
+            "scale": "yscale",
+            "field": "y"
+          },
+          "strokeWidth": {
+            "value": 1
           }
         }
       }
-    ]
+    }]
   };
 
-  var view = new vega.View(vega.parse(plot_spec))
-      .logLevel(vega.Warn) // set view logging level
-      .renderer("svg") // set render type (defaults to "canvas")
-      .run(); // update and render the view
+  const view = new vega.View(vega.parse(plot_spec))
+    .logLevel(vega.Warn) // set view logging level
+    .renderer("svg") // set render type (defaults to "canvas")
+    .run(); // update and render the view
 
   return view.toImageURL("png", 2).then(function(url) {
     // Remove the first occurrence of the data type header thingy
-    const base64res = url.replace("data:image/png;base64,", "");
-    return Buffer.from(base64res, "base64");
-  }).catch(function(error) { 
-    return {message: error, status: 500};
+    return Buffer.from(url.replace("data:image/png;base64,", ""), "base64");
+  }, function(err) {
+    return Promise.reject({
+      message: err,
+      status: 500
+    });
   });
 }
 
-exports.plotjson_GCF = function(req, res) {
-  plotjson(req.body, req.query).then(function (output) {
-    res.set("content-type", "image/png");
-    res.status(200).send(output);
-  }, function(ret) {
-    res.set("content-type", "text/plain");
-    res.status(ret.status).send(ret.message);
+exports.mainAWS = function(event, context, callback) {
+  plotjson(event.data, event.names).then(function(out) {
+    callback(null, out);
+  }, function(err) {
+    callback(JSON.stringify(err));
   });
 };
 
-
-
-
+exports.mainGCP = function(req, res) {
+  plotjson(req.body, req.query).then(function(out) {
+    res.set("content-type", "image/png");
+    res.status(200).send(out);
+  }, function(err) {
+    res.set("content-type", "text/plain");
+    res.status(err.status).send(err.message);
+  });
+};
