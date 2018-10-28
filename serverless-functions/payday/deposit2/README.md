@@ -1,4 +1,4 @@
-## transfer2
+## deposit2
 
 Working example of the corresponding code found in _Figure 2_ of the paper. Motivates how serverless function should _not_ be composed.
 
@@ -6,7 +6,6 @@ Working example of the corresponding code found in _Figure 2_ of the paper. Moti
 
 ```json
 {
-  "from": 00,
   "to1": 00,
   "to2": 00,
   "amnt1": 00,
@@ -18,7 +17,7 @@ Working example of the corresponding code found in _Figure 2_ of the paper. Moti
 
 #### Example:
 ```bash
-$ gcloud functions call transfer2 --region us-east1 --data '{"from": 5644406560391168, "to1": 5639445604728832, "to2": 5629499534213120, "amnt1": 10, "amnt2": 10, "tId1": "11", "tId2":"12"}'
+$ gcloud functions call deposit2 --region us-east1 --data '{"to1": 5639445604728832, "to2": 5629499534213120, "amnt1": 10, "amnt2": 10, "tId1": "11", "tId2":"12"}'
 executionId: c4cxylkz6n7i
-result: Transfers complete.
+result: true
 ```
