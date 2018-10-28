@@ -17,7 +17,7 @@ Working example of the corresponding code found in _Figure 2_ of the paper. Moti
 
 #### Example:
 ```bash
-$ gcloud functions call deposit2 --region us-east1 --data '{"to1": 5639445604728832, "to2": 5629499534213120, "amnt1": 10, "amnt2": 10, "tId1": "11", "tId2":"12"}'
-executionId: c4cxylkz6n7i
-result: true
+$ gcloud functions call deposit2 --region us-east1 --data '{"to1": 564440, "to2": 562949, "amnt1": 10, "amnt2": 10, "tId1": "1", "tId2":"2"}'
+executionId: uaivbaug9foz
+result: 'true'
 ```
