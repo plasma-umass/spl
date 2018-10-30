@@ -49,7 +49,7 @@ pub trait Eval : Sync {
       Expr::Pure(n) => self.invoke(n, input),
       Expr::Download(jt_expr) => eval_json(&jt_expr, input)
           .and_then(move |pl| pl.to_json())
-          .map(move |url| download(&url.to_string()))
+          .map(move |url| download(url.as_str().unwrap()))
           .unwrap(),
       Expr::Seq(e1, e2) => Box::new(self.eval(input, e1)
           .and_then(move |result| self.eval(result, e2))),
