@@ -5,4 +5,4 @@ mod eval;
 
 pub use self::syntax::{Expr, Pat};
 pub use self::eval::eval;
-pub use self::parser::parse;
+pub use self::parser::{parse,parse_string};
