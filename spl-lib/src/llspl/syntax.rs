@@ -83,7 +83,7 @@ impl Payload {
 #[derive(Debug, PartialEq)]
 pub enum Expr {
     Pure(String),
-    Download(String),
+    Download(json_transformers::Expr),
     Seq(Box<Expr>, Box<Expr>),
     Project(json_transformers::Expr),
     Fetch(String),
