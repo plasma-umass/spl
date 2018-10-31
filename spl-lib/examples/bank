@@ -1,10 +1,4 @@
-project { "x": $in.deposit, "y": $in };
+project { "x": $in.deposit1, "y": $in.deposit2 };
 split (pure "bank");
-project { "x": $in.y.transfer1, "y": $in.y };
-split (pure "bank");
-if (project $in.x == false) {
-  project "First transfer failed."
-} else {
-  project $in.y.transfer2;
-  pure "bank"
-}
+project $in.y;
+pure "bank"
