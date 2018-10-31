@@ -129,12 +129,16 @@ def run_many(llsplName, csvFilename, trials = 10, input = "{}")
 end
 
 if ARGV.length < 2
-    puts "Usage: ruby bench.rb llspl-name output-csv-file [numRuns = 10]"
+    puts "Usage: ruby bench.rb llspl-name output-csv-file [numRuns = 10] [data = '{}']"
     exit(1)
 end
 
-if ARGV.length == 3
+if ARGV.length == 4
+    data = ARGV[3]
     numRuns = ARGV[2].to_i
+else if ARGV.length = 3
+    numRuns = ARGV[2].to_i
+    data = '{}'
 else
     numRuns = 10
 end
@@ -143,4 +147,4 @@ end
 `gcloud config set functions/region us-east1`
 `pkill spl-lib`
 print `cargo build --release`
-print run_many(ARGV[0], ARGV[1], numRuns)
+print run_many(ARGV[0], ARGV[1], numRuns, data)

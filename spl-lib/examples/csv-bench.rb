@@ -9,5 +9,5 @@ sizes = [10011,110908,1214683,13263266,133,144570688,1445,16228,178451,1950655,2
 sizes.sort!
 
 for s in sizes
-    system("ruby bench.rb download-csv-benchmarks/llspl/download-#{s} download-csv-benchmarks/data/data-#{s}.csv #{numRuns}", out: $stdout, err: $stderr)
+    system("ruby bench.rb plot-case-study download-csv-benchmarks/data/data-#{s}.csv #{numRuns} 'https://people.cs.umass.edu/~dpinckney/test_plotting_data/csv/#{s}.csv'", out: $stdout, err: $stderr)
 end

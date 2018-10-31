@@ -1,0 +1,4 @@
+download $in;
+pure "csv2json";
+project $in.map({"x": $in["time"], "y": $in["voltage"] });
+pure "plotjson"
