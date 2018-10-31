@@ -49,8 +49,8 @@ named!(pure_e<CompleteStr,Expr>,
 named!(download_e<CompleteStr, Expr>,
     do_parse!(
         _reserved : tag!("download") >>
-        url : ws!(string_atom) >>
-        (Expr::Download(url.to_string()))));
+        url : ws!(json_transformers::parse) >>
+        (Expr::Download(url))));
 
 named!(project_e<CompleteStr,Expr>,
     map!(preceded!(tag!("project"), ws!(json_transformers::parse)),
@@ -121,7 +121,7 @@ mod tests {
     #[test]
     fn test_download() {
         assert!(parse_string("download \"http://foo.bar\"") ==
-                Expr::Download("http://foo.bar".to_string()));
+                Expr::Download(json_transformers::parse_string("\"http://foo.bar\"")));
     }
 
     #[test]
@@ -164,8 +164,8 @@ mod tests {
     #[test]
     fn test_seq_download() {
         assert!(parse_string("download \"f\"; download \"g\"") ==
-            Expr::Seq(Box::new(Expr::Download("f".to_string())),
-                    Box::new(Expr::Download("g".to_string()))));
+            Expr::Seq(Box::new(Expr::Download(json_transformers::parse_string("\"f\""))),
+                    Box::new(Expr::Download(json_transformers::parse_string("\"g\"")))));
     }
 
 
@@ -188,6 +188,14 @@ mod tests {
     #[test]
     fn test_download_in_parens() {
         assert!(parse_string("(download \"http://foo.bar\")") ==
-        Expr::Download("http://foo.bar".to_string()));
+        Expr::Download(json_transformers::parse_string("\"http://foo.bar\"")));
+    }
+
+    #[test]
+    fn test_download_json() {
+        match parse_string("download $in.url") {
+            Expr::Download(_json) => assert!(true),
+            _ => assert!(false)
+        }
     }
 }

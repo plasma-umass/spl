@@ -27,7 +27,7 @@ fn extract_split(input: Payload) -> Result<(json::Value, json::Value), Error> {
   }
 }
 
-fn download(url: &str) -> EvalResult {
+fn download<'a>(url: &str) -> EvalResult<'a> {
   use reqwest;
 
   let mut buf: Vec<u8> = vec![];
@@ -47,7 +47,10 @@ pub trait Eval : Sync {
   fn eval<'a>(&'a self, input: Payload, expr: &'a Expr) -> EvalResult<'a> {
     match expr {
       Expr::Pure(n) => self.invoke(n, input),
-      Expr::Download(url) => download(url),
+      Expr::Download(jt_expr) => eval_json(&jt_expr, input)
+          .and_then(move |pl| pl.to_json())
+          .map(move |url| download(url.as_str().unwrap()))
+          .unwrap(),
       Expr::Seq(e1, e2) => Box::new(self.eval(input, e1)
           .and_then(move |result| self.eval(result, e2))),
       Expr::Fetch(path) => self.fetch(path),
