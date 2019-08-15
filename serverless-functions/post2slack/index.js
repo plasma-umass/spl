@@ -23,6 +23,7 @@ exports.mainGCP = function(req, res) {
     method: 'POST',
     headers: {
       'content-type': 'application/json;charset=utf-8',
+      //TODO: This token is disabled; a new one must be generated.
       authorization: 'Bearer xoxp-2521834784-429986587315-435464683666-81eea6abe2ecc26b3469622741021ea6'
     }
   }, function(response) {//One-time listener for the response event.
